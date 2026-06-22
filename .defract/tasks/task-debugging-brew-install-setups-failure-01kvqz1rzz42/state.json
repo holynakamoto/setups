@@ -1,11 +1,11 @@
 {
   "id": "task-debugging-brew-install-setups-failure-01kvqz1rzz42",
   "status": "active",
-  "stage": "scope",
+  "stage": "implementation",
   "phase": 0,
   "totalPhases": 1,
   "createdAt": "2026-06-22T15:26:41Z",
-  "updatedAt": "2026-06-22T15:32:29Z",
+  "updatedAt": "2026-06-22T18:28:39Z",
   "events": [
     {
       "base_branch": "master",
@@ -102,6 +102,182 @@
       "type": "stage_work_complete",
       "worktree_head": "d756e771ca815262364aa1c5c9ca954519acbb43",
       "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "base_branch": "master",
+      "merged_commits": 2,
+      "timestamp": "2026-06-22T18:24:48Z",
+      "type": "worktree_synced"
+    },
+    {
+      "actor": null,
+      "stage": "scope",
+      "timestamp": "2026-06-22T18:24:47Z",
+      "type": "stage_approved"
+    },
+    {
+      "current_worktree_head": "2e1ab7f39d0d2a99929a397f960058d810507ef6",
+      "current_worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stage": "scope",
+      "stale_worktree_head": "d756e771ca815262364aa1c5c9ca954519acbb43",
+      "stale_worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-06-22T18:24:48Z",
+      "type": "worktree_drift_detected",
+      "what_changed": "HEAD"
+    },
+    {
+      "action": "sweep",
+      "rationale": "Routine sync drift: HEAD fast-forwarded (stale HEAD is a strict ancestor of current) with a byte-identical dirty-status digest; swept forward automatically without waking an agent.",
+      "resolved_by": "auto",
+      "stage": "scope",
+      "timestamp": "2026-06-22T18:24:48Z",
+      "type": "worktree_drift_resolved"
+    },
+    {
+      "from": "scope",
+      "timestamp": "2026-06-22T18:24:48Z",
+      "to": "implementation",
+      "type": "stage_advanced"
+    },
+    {
+      "base_branch": "master",
+      "reason": "already_up_to_date",
+      "timestamp": "2026-06-22T18:24:48Z",
+      "type": "worktree_sync_skipped"
+    },
+    {
+      "mode": "start",
+      "session_id": "01kvr97x6e7baxc74zeh910kbr",
+      "stage": "implementation",
+      "timestamp": "2026-06-22T18:24:48Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "exit_code": 143,
+      "session_id": "01kvqz3bbjcxgq2bj8sddmz21e",
+      "timed_out": false,
+      "timestamp": "2026-06-22T18:24:49Z",
+      "type": "agent_exited"
+    },
+    {
+      "note": "Creating .github/workflows/release.yml and updating Formula/setups.rb for Phase 1",
+      "phase": 0,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T18:25:00Z",
+      "type": "work_resumed"
+    },
+    {
+      "description": "Starting phase 1: Automated release pipeline",
+      "percentage": 0,
+      "phase": 1,
+      "timestamp": "2026-06-22T18:25:05Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Implementing core changes",
+      "percentage": 20,
+      "phase": 1,
+      "timestamp": "2026-06-22T18:25:10Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Running verification checks",
+      "percentage": 60,
+      "phase": 1,
+      "timestamp": "2026-06-22T18:26:35Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Running full check suite",
+      "percentage": 80,
+      "phase": 1,
+      "timestamp": "2026-06-22T18:27:38Z",
+      "type": "progress_report"
+    },
+    {
+      "details": "YAML validation via Ruby: passed. cargo check: clean (no source changes). Two placeholder comment lines removed from formula. Remaining PLACEHOLDER sha256 values are intentional — CI sed substitution replaces them at release time.",
+      "failed": 0,
+      "passed": 2,
+      "phase": 0,
+      "skipped": 0,
+      "timestamp": "2026-06-22T18:27:56Z",
+      "type": "test_results"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Implementation: PLACEHOLDER sha256 values retained in Formula/setups.rb; only the developer-facing comment lines removed",
+      "phase": 1,
+      "rationale": "The sed commands in the publish job require the PLACEHOLDER_SHA256_AARCH64 and PLACEHOLDER_SHA256_X86_64 strings to be present as substitution targets. Removing them would make the sed commands no-ops and leave the formula without sha256 values. After the CI runs, both PLACEHOLDER values are replaced with real 64-character hex strings, satisfying the post-CI grep check.",
+      "timestamp": "2026-06-22T18:28:02Z",
+      "type": "decision"
+    },
+    {
+      "description": "Phase 1 implementation complete — awaiting approval",
+      "percentage": 100,
+      "phase": 1,
+      "timestamp": "2026-06-22T18:28:05Z",
+      "type": "progress_report"
+    },
+    {
+      "change_summary": "Phase 1 complete: Automated release pipeline",
+      "revision": 1,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T18:28:18Z",
+      "type": "stage_content_updated"
+    },
+    {
+      "artifacts_created": [
+        ".github/workflows/release.yml",
+        "Formula/setups.rb"
+      ],
+      "phase": 0,
+      "summary": "Created .github/workflows/release.yml with parallel native macOS build matrix (macos-14/aarch64, macos-13/x86_64) and a publish job that reads checksums, updates the formula via BSD sed, commits to master, and creates the GitHub Release with both tarballs. Removed the two placeholder comment lines from Formula/setups.rb; sha256 placeholder values retained as CI sed substitution targets.",
+      "timestamp": "2026-06-22T18:28:24Z",
+      "type": "phase_completed"
+    },
+    {
+      "items": [
+        {
+          "description": "Enable read/write workflow permissions: go to the repo Settings → Actions → General → Workflow permissions and select \"Read and write permissions\", then save."
+        },
+        {
+          "description": "Push a test tag to trigger the workflow: `git tag v0.1.0 && git push origin v0.1.0` (use a version that doesn't already exist on the remote)."
+        },
+        {
+          "description": "Open the Actions tab on GitHub and confirm three jobs appear: two parallel `Build` jobs (one for `aarch64-apple-darwin`, one for `x86_64-apple-darwin`) and a `Publish release` job that starts only after both build jobs turn green."
+        },
+        {
+          "description": "On the GitHub Releases page for `v0.1.0`, confirm both `setups-aarch64-apple-darwin.tar.gz` and `setups-x86_64-apple-darwin.tar.gz` appear as release assets."
+        },
+        {
+          "description": "After the workflow completes, run `grep PLACEHOLDER Formula/setups.rb` on the `master` branch and confirm it returns no matches (both sha256 values are 64-character hex strings)."
+        },
+        {
+          "description": "On an Apple Silicon Mac, run `brew tap holynakamoto/setups https://github.com/holynakamoto/setups && brew install holynakamoto/setups/setups` and confirm installation completes without checksum errors."
+        },
+        {
+          "description": "Run `brew test holynakamoto/setups/setups` and confirm it exits 0 with output containing `setups`."
+        }
+      ],
+      "phase": 0,
+      "phase_title": "Automated release pipeline",
+      "timestamp": "2026-06-22T18:28:34Z",
+      "type": "manual_tests"
+    },
+    {
+      "agent_phase": 1,
+      "phase_title": "Automated release pipeline",
+      "server_phase": 0,
+      "timestamp": "2026-06-22T18:28:39Z",
+      "type": "phase_drift_detected"
+    },
+    {
+      "phase": 0,
+      "phase_title": "Automated release pipeline",
+      "timestamp": "2026-06-22T18:28:39Z",
+      "type": "phase_awaiting_approval",
+      "worktree_head": "2e1ab7f39d0d2a99929a397f960058d810507ef6",
+      "worktree_status_digest": "c59bd7306ca6f3d70d6d4d723ef3058343c191ea2d7b0a0808f7be672b9cfff2"
     }
   ],
   "needsArchitecture": false,
@@ -118,28 +294,36 @@
     "classifiedBy": "scope-agent",
     "rationale": "Fixes broken brew install behavior caused by missing CI and placeholder SHA256s — no new user-visible features (skip design), well-contained to 2 files in a single CI subsystem (skip architecture)"
   },
+  "stageApprovals": {
+    "scope": "2026-06-22T18:24:47Z"
+  },
+  "stageContent": {
+    "implementation": "## Phase 1: Automated release pipeline\n\n### Files Changed\n\n- `.github/workflows/release.yml` — created; tag-triggered (`v*.*.*`) workflow with:\n  - `build` matrix job: `macos-14` (aarch64) and `macos-13` (x86_64), each running `rustup target add`, `cargo build --release --target`, creating a `.tar.gz`, computing SHA256 via `shasum -a 256`, and uploading both as artifacts\n  - `publish` job: downloads all artifacts, reads both `.sha256` files into env vars, applies BSD `sed -i ''` to replace `PLACEHOLDER_SHA256_AARCH64` and `PLACEHOLDER_SHA256_X86_64` in `Formula/setups.rb`, commits and pushes to master, then creates the GitHub Release with both tarballs as assets\n  - Workflow-level `permissions: contents: write` for `GITHUB_TOKEN` push and release create\n\n- `Formula/setups.rb` — removed the two developer-facing comment lines (`# Replace PLACEHOLDER_SHA256...` on original lines 9 and 15); `sha256 \"PLACEHOLDER_SHA256_*\"` values intentionally retained as sed substitution targets for the CI workflow\n\n### Deviations from Plan\n\nNone. Implementation follows the spec exactly. The PLACEHOLDER sha256 values in the formula were kept (not removed) because the sed commands in the CI require those strings as substitution targets — this is the intended design per R7.\n\n### Verification\n\n- YAML valid (confirmed via `ruby -e \"require 'yaml'; YAML.load_file(...)\"`)\n- `cargo check` clean — no Rust source changes, no regressions\n- Comment lines removed from formula (grep confirmed)\n- Post-CI checks (no PLACEHOLDER in formula, real sha256s, GitHub Release assets) require pushing a `v*.*.*` tag to verify\n"
+  },
   "stages": {
-    "review": {
-      "status": "not_started"
-    },
     "implementation": {
-      "status": "not_started"
-    },
-    "scope": {
-      "status": "awaiting_approval",
-      "startedAt": "2026-06-22T15:27:33Z"
-    },
-    "release": {
-      "status": "not_started"
+      "status": "in_progress",
+      "startedAt": "2026-06-22T18:24:48Z"
     },
     "architecture": {
       "status": "skipped"
     },
     "design": {
       "status": "skipped"
+    },
+    "scope": {
+      "status": "approved",
+      "approvedAt": "2026-06-22T18:24:47Z",
+      "startedAt": "2026-06-22T15:27:33Z"
+    },
+    "release": {
+      "status": "not_started"
+    },
+    "review": {
+      "status": "not_started"
     }
   },
   "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-debugging-brew-install-setups-failure-01kvqz1rzz42",
   "worktreeBaseBranch": "master",
-  "worktreeLastSyncedAt": "2026-06-22T15:27:33Z"
+  "worktreeLastSyncedAt": "2026-06-22T18:24:48Z"
 }

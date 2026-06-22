@@ -3,7 +3,7 @@ defract:
   id: task-debugging-brew-install-setups-failure-01kvqz1rzz42
   type: improvement
   status: active
-  stage: scope
+  stage: implementation
   phase: 0
   total_phases: 1
   priority: normal
@@ -132,3 +132,28 @@ The Expected Outcome in the approved intent check uses the short form; that form
 ### Dependencies
 
 - GitHub repository Settings → Actions → General → Workflow permissions must allow read and write access before the release workflow can push the formula commit or create a release.
+
+## Implementation Notes
+
+## Phase 1: Automated release pipeline
+
+### Files Changed
+
+- `.github/workflows/release.yml` — created; tag-triggered (`v*.*.*`) workflow with:
+  - `build` matrix job: `macos-14` (aarch64) and `macos-13` (x86_64), each running `rustup target add`, `cargo build --release --target`, creating a `.tar.gz`, computing SHA256 via `shasum -a 256`, and uploading both as artifacts
+  - `publish` job: downloads all artifacts, reads both `.sha256` files into env vars, applies BSD `sed -i ''` to replace `PLACEHOLDER_SHA256_AARCH64` and `PLACEHOLDER_SHA256_X86_64` in `Formula/setups.rb`, commits and pushes to master, then creates the GitHub Release with both tarballs as assets
+  - Workflow-level `permissions: contents: write` for `GITHUB_TOKEN` push and release create
+
+- `Formula/setups.rb` — removed the two developer-facing comment lines (`# Replace PLACEHOLDER_SHA256...` on original lines 9 and 15); `sha256 "PLACEHOLDER_SHA256_*"` values intentionally retained as sed substitution targets for the CI workflow
+
+### Deviations from Plan
+
+None. Implementation follows the spec exactly. The PLACEHOLDER sha256 values in the formula were kept (not removed) because the sed commands in the CI require those strings as substitution targets — this is the intended design per R7.
+
+### Verification
+
+- YAML valid (confirmed via `ruby -e "require 'yaml'; YAML.load_file(...)"`)
+- `cargo check` clean — no Rust source changes, no regressions
+- Comment lines removed from formula (grep confirmed)
+- Post-CI checks (no PLACEHOLDER in formula, real sha256s, GitHub Release assets) require pushing a `v*.*.*` tag to verify
+
