@@ -217,19 +217,19 @@ fn classify_headline(headline: &str) -> CatalystType {
     {
         CatalystType::EarningsMiss
     } else if h.contains("fda")
+        && (h.contains("reject") || h.contains("deni") || h.contains("refuse") || h.contains("complete response"))
+    {
+        CatalystType::FdaRejection
+    } else if h.contains("fda")
         && (h.contains("approv") || h.contains("grant") || h.contains("clear") || h.contains("accept"))
     {
         CatalystType::FdaApproval
-    } else if h.contains("fda")
-        && (h.contains("reject") || h.contains("deny") || h.contains("refuse") || h.contains("complete response"))
-    {
-        CatalystType::FdaRejection
     } else if h.contains("merger") || h.contains("merges with") {
         CatalystType::Merger
-    } else if h.contains("acqui") || h.contains("buyout") || h.contains("takeover") || h.contains("to buy") {
-        CatalystType::Acquisition
     } else if h.contains("upgrade") || h.contains("outperform") || h.contains("overweight") || h.contains("buy rating") {
         CatalystType::AnalystUpgrade
+    } else if h.contains("acqui") || h.contains("buyout") || h.contains("takeover") || h.contains("to buy") {
+        CatalystType::Acquisition
     } else if h.contains("downgrade") || h.contains("underperform") || h.contains("underweight") || h.contains("sell rating") {
         CatalystType::AnalystDowngrade
     } else if h.contains("contract") || h.contains("award") || h.contains("wins deal") {
@@ -238,5 +238,124 @@ fn classify_headline(headline: &str) -> CatalystType {
         CatalystType::GeneralNews
     } else {
         CatalystType::Unknown
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::classify_headline;
+    use crate::models::CatalystType;
+
+    // ── earnings ─────────────────────────────────────────────────────────────
+
+    #[test]
+    fn classify_earnings_beat_keyword_beat() {
+        assert!(matches!(classify_headline("NVDA earnings beat estimates by 15%"), CatalystType::EarningsBeat));
+    }
+
+    #[test]
+    fn classify_earnings_beat_keyword_surpass() {
+        assert!(matches!(classify_headline("Q3 results surpass earnings expectations"), CatalystType::EarningsBeat));
+    }
+
+    #[test]
+    fn classify_earnings_beat_keyword_exceed() {
+        assert!(matches!(classify_headline("Earnings exceed analyst consensus"), CatalystType::EarningsBeat));
+    }
+
+    #[test]
+    fn classify_earnings_miss_keyword_miss() {
+        assert!(matches!(classify_headline("XYZ earnings miss consensus by 5%"), CatalystType::EarningsMiss));
+    }
+
+    #[test]
+    fn classify_earnings_miss_keyword_disappoint() {
+        assert!(matches!(classify_headline("Disappointing earnings disappoint investors"), CatalystType::EarningsMiss));
+    }
+
+    // ── fda ──────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn classify_fda_approval_keyword_approves() {
+        assert!(matches!(classify_headline("FDA approves new drug for rare disease"), CatalystType::FdaApproval));
+    }
+
+    #[test]
+    fn classify_fda_approval_keyword_clearance() {
+        assert!(matches!(classify_headline("Company receives FDA clearance for device"), CatalystType::FdaApproval));
+    }
+
+    #[test]
+    fn classify_fda_rejection_keyword_reject() {
+        assert!(matches!(classify_headline("FDA rejects XYZ drug application"), CatalystType::FdaRejection));
+    }
+
+    #[test]
+    fn classify_fda_rejection_keyword_deny() {
+        assert!(matches!(classify_headline("FDA denies approval for cancer treatment"), CatalystType::FdaRejection));
+    }
+
+    // ── m&a ──────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn classify_merger() {
+        assert!(matches!(classify_headline("ABC merger with DEF announced"), CatalystType::Merger));
+    }
+
+    #[test]
+    fn classify_acquisition_keyword_acquires() {
+        assert!(matches!(classify_headline("XYZ acquires competitor for $2B"), CatalystType::Acquisition));
+    }
+
+    #[test]
+    fn classify_acquisition_keyword_buyout() {
+        assert!(matches!(classify_headline("Private equity buyout of XYZ at premium"), CatalystType::Acquisition));
+    }
+
+    // ── analyst ──────────────────────────────────────────────────────────────
+
+    #[test]
+    fn classify_analyst_upgrade_keyword_upgrade() {
+        assert!(matches!(classify_headline("Goldman upgrades XYZ to Buy"), CatalystType::AnalystUpgrade));
+    }
+
+    #[test]
+    fn classify_analyst_upgrade_keyword_outperform() {
+        assert!(matches!(classify_headline("Analyst rates XYZ as outperform"), CatalystType::AnalystUpgrade));
+    }
+
+    #[test]
+    fn classify_analyst_downgrade_keyword_downgrade() {
+        assert!(matches!(classify_headline("Morgan Stanley downgrades XYZ to Hold"), CatalystType::AnalystDowngrade));
+    }
+
+    #[test]
+    fn classify_analyst_downgrade_keyword_underperform() {
+        assert!(matches!(classify_headline("Analyst cuts XYZ to underperform"), CatalystType::AnalystDowngrade));
+    }
+
+    // ── contract ─────────────────────────────────────────────────────────────
+
+    #[test]
+    fn classify_contract_win_keyword_contract() {
+        assert!(matches!(classify_headline("XYZ wins $500M DoD contract"), CatalystType::ContractWin));
+    }
+
+    #[test]
+    fn classify_contract_win_keyword_award() {
+        assert!(matches!(classify_headline("Government awards XYZ multi-year deal"), CatalystType::ContractWin));
+    }
+
+    // ── fallback ─────────────────────────────────────────────────────────────
+
+    #[test]
+    fn classify_general_news_long_unmatched_headline() {
+        assert!(matches!(classify_headline("XYZ announces new product launch for 2026"), CatalystType::GeneralNews));
+    }
+
+    #[test]
+    fn classify_unknown_headline_too_short() {
+        // "XYZ" is 3 chars, not > 10 → Unknown
+        assert!(matches!(classify_headline("XYZ"), CatalystType::Unknown));
     }
 }

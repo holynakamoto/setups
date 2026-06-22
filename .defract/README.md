@@ -4,7 +4,10 @@ This project uses [defract](https://defract.dev) for structured AI-assisted deve
 
 ## Tasks
 
-No tasks yet.
+| Task | Stage | Status |
+|------|-------|--------|
+| Would like to add entry and exit positions, heat maps or matricies showing sh... | scope | active |
+
 
 ## Reading without defract
 
