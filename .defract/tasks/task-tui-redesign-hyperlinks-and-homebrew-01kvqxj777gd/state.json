@@ -1,11 +1,11 @@
 {
   "id": "task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd",
   "status": "active",
-  "stage": "scope",
-  "phase": 0,
+  "stage": "implementation",
+  "phase": 1,
   "totalPhases": 3,
   "createdAt": "2026-06-22T15:00:43Z",
-  "updatedAt": "2026-06-22T15:05:34Z",
+  "updatedAt": "2026-06-22T15:09:15Z",
   "events": [
     {
       "base_branch": "master",
@@ -60,30 +60,301 @@
       "revision": 2,
       "timestamp": "2026-06-22T15:05:34Z",
       "type": "scope_update"
+    },
+    {
+      "rationale": "UI changes present (TUI table and detail panel overhaul) but no dedicated design stage needed — this is a terminal UI where visual decisions are incremental edits to existing ratatui patterns, not a graphical design pass. Architecture skipped: all changes follow the existing add-a-field / propagate / display pattern across 6 files; no new system boundaries or cross-cutting structural decisions are required.",
+      "stages": [
+        "scope",
+        "implementation",
+        "review",
+        "release"
+      ],
+      "template": "full-feature",
+      "tier": "standard",
+      "timestamp": "2026-06-22T15:05:42Z",
+      "type": "workflow_classified"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Replace Short% TUI column with Dir (LONG/SHORT)",
+      "rationale": "Short% is always \"N/A\" because Finnhub basic tier does not return short interest data and `short_float_pct` is hardcoded to None in screener.rs. Displaying a column that is always N/A wastes space and misleads users. Dir (direction) uses data that is already computed and provides actionable signal (long vs short bias per setup).",
+      "timestamp": "2026-06-22T15:05:48Z",
+      "type": "decision"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Use std::process::Command::new(\"open\") to open browser URLs instead of adding the open crate",
+      "rationale": "macOS ships with the `open` command, which is exactly what the `open` crate wraps on macOS anyway. Since Homebrew distribution targets macOS only, the platform-native command is sufficient and avoids adding a dependency for a one-line use case.",
+      "timestamp": "2026-06-22T15:05:51Z",
+      "type": "decision"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Emit OSC 8 hyperlinks unconditionally in --plain mode",
+      "rationale": "Terminal capability detection for OSC 8 support is complex, not standardized, and would add scope. Terminals that do not support OSC 8 silently ignore the escape sequences; they do not crash or corrupt the output in any common terminal emulator. The marginal benefit of detection is low.",
+      "timestamp": "2026-06-22T15:05:57Z",
+      "type": "decision"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Formula/setups.rb uses placeholder SHA256 values; tap repo creation is out of scope",
+      "rationale": "No GitHub release binary exists yet, so a real SHA256 cannot be computed. The formula serves as the structural artifact that documents the packaging intent and can be completed at first release. Creating the tap repo is infrastructure work separate from this feature task.",
+      "timestamp": "2026-06-22T15:06:01Z",
+      "type": "decision"
+    },
+    {
+      "stage": "scope",
+      "summary": "Full scope written as revision 2. Three implementation phases: (1) URL plumbing — add `url` to `NewsItem`, thread it through `get_top_catalyst()`, `Setup.catalyst_url`, screener, and symbol subcommand; (2) TUI redesign — replace Short% column with Dir, add `o` keybinding to open article in browser, add URL to detail panel, add market session to header, add OSC 8 hyperlinks to --plain output; (3) Homebrew — Formula/setups.rb skeleton + README install docs. 14 requirements, 10 acceptance criteria. Workflow: implementation → review → release (no architecture or design stages).",
+      "timestamp": "2026-06-22T15:06:12Z",
+      "type": "stage_work_complete",
+      "worktree_head": "97f54c54fca95e445a79594d9b99721c48b69013",
+      "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "base_branch": "master",
+      "merged_commits": 1,
+      "timestamp": "2026-06-22T15:06:44Z",
+      "type": "worktree_synced"
+    },
+    {
+      "actor": null,
+      "stage": "scope",
+      "timestamp": "2026-06-22T15:06:43Z",
+      "type": "stage_approved"
+    },
+    {
+      "current_worktree_head": "4eb382293e3e23219bedde1c860217528b060fae",
+      "current_worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stage": "scope",
+      "stale_worktree_head": "97f54c54fca95e445a79594d9b99721c48b69013",
+      "stale_worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-06-22T15:06:44Z",
+      "type": "worktree_drift_detected",
+      "what_changed": "HEAD"
+    },
+    {
+      "action": "sweep",
+      "rationale": "Routine sync drift: HEAD fast-forwarded (stale HEAD is a strict ancestor of current) with a byte-identical dirty-status digest; swept forward automatically without waking an agent.",
+      "resolved_by": "auto",
+      "stage": "scope",
+      "timestamp": "2026-06-22T15:06:44Z",
+      "type": "worktree_drift_resolved"
+    },
+    {
+      "from": "scope",
+      "timestamp": "2026-06-22T15:06:44Z",
+      "to": "implementation",
+      "type": "stage_advanced"
+    },
+    {
+      "base_branch": "master",
+      "reason": "already_up_to_date",
+      "timestamp": "2026-06-22T15:06:44Z",
+      "type": "worktree_sync_skipped"
+    },
+    {
+      "mode": "start",
+      "session_id": "01kvqxx7rm8r70rmzppg070xsy",
+      "stage": "implementation",
+      "timestamp": "2026-06-22T15:06:44Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "exit_code": 143,
+      "session_id": "01kvqxm4vst7zvjwhdvax5qs3g",
+      "timed_out": false,
+      "timestamp": "2026-06-22T15:06:44Z",
+      "type": "agent_exited"
+    },
+    {
+      "note": "Starting Phase 1: Thread article URLs through the data pipeline",
+      "phase": 0,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T15:06:55Z",
+      "type": "work_resumed"
+    },
+    {
+      "description": "Starting phase 1: Thread article URLs through the data pipeline",
+      "percentage": 0,
+      "phase": 1,
+      "timestamp": "2026-06-22T15:07:17Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Implementing core changes across 4 files",
+      "percentage": 20,
+      "phase": 1,
+      "timestamp": "2026-06-22T15:07:20Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Running verification checks",
+      "percentage": 60,
+      "phase": 1,
+      "timestamp": "2026-06-22T15:08:00Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Running full check suite",
+      "percentage": 80,
+      "phase": 1,
+      "timestamp": "2026-06-22T15:08:26Z",
+      "type": "progress_report"
+    },
+    {
+      "details": "99 tests pass, 0 failures. cargo build produces no new warnings.",
+      "failed": 0,
+      "passed": 99,
+      "phase": 0,
+      "skipped": 0,
+      "timestamp": "2026-06-22T15:08:29Z",
+      "type": "test_results"
+    },
+    {
+      "description": "Phase 1 implementation complete — awaiting approval",
+      "percentage": 100,
+      "phase": 1,
+      "timestamp": "2026-06-22T15:08:32Z",
+      "type": "progress_report"
+    },
+    {
+      "change_summary": "Phase 1 complete: Thread article URLs through the data pipeline",
+      "revision": 1,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T15:08:42Z",
+      "type": "stage_content_updated"
+    },
+    {
+      "artifacts_created": [
+        "src/data/finnhub.rs",
+        "src/models/setup.rs",
+        "src/analysis/screener.rs",
+        "src/main.rs"
+      ],
+      "phase": 0,
+      "summary": "Added url field to NewsItem, updated get_top_catalyst() to return a three-tuple (headline, url, catalyst), added catalyst_url to Setup, wired it through screener.rs, and added URL printing to the symbol subcommand. All 99 tests pass, no new warnings.",
+      "timestamp": "2026-06-22T15:08:47Z",
+      "type": "phase_completed"
+    },
+    {
+      "items": [
+        {
+          "description": "Run `cargo test` and confirm the output shows `99 passed; 0 failed`."
+        },
+        {
+          "description": "Run `cargo build` and confirm no new warnings appear in the output."
+        },
+        {
+          "description": "Run `cargo run -- symbol NVDA` (with a valid `FINNHUB_API_KEY` in `.env`) and verify a `News URL:` line appears in the output when Finnhub returns a URL for the top news item."
+        },
+        {
+          "description": "Run `cargo run -- symbol NVDA` and verify that when no URL is present in the API response, the `News URL:` line is simply absent — no crash, no empty line."
+        },
+        {
+          "description": "Inspect `src/data/finnhub.rs` around line 67 and confirm `NewsItem` has both `headline: String` and `url: Option<String>` fields."
+        },
+        {
+          "description": "Inspect `src/models/setup.rs` around line 89 and confirm `Setup` has a `catalyst_url: Option<String>` field after `catalyst_headline`."
+        }
+      ],
+      "phase": 0,
+      "phase_title": "Thread article URLs through the data pipeline",
+      "timestamp": "2026-06-22T15:08:54Z",
+      "type": "manual_tests"
+    },
+    {
+      "agent_phase": 1,
+      "phase_title": "Thread article URLs through the data pipeline",
+      "server_phase": 0,
+      "timestamp": "2026-06-22T15:08:58Z",
+      "type": "phase_drift_detected"
+    },
+    {
+      "phase": 0,
+      "phase_title": "Thread article URLs through the data pipeline",
+      "timestamp": "2026-06-22T15:08:58Z",
+      "type": "phase_awaiting_approval",
+      "worktree_head": "4eb382293e3e23219bedde1c860217528b060fae",
+      "worktree_status_digest": "0b7d2c80ab699d52afc80645738aef7ad4616a12c557ec16f8afd1da7202b1ff"
+    },
+    {
+      "approved_by": "user",
+      "phase": 0,
+      "phase_title": "Thread article URLs through the data pipeline",
+      "timestamp": "2026-06-22T15:09:15Z",
+      "type": "phase_approved"
+    },
+    {
+      "checked_indices": [],
+      "phase": 0,
+      "timestamp": "2026-06-22T15:09:15Z",
+      "type": "manual_tests_checks_persisted"
+    },
+    {
+      "base_branch": "master",
+      "reason": "already_up_to_date",
+      "timestamp": "2026-06-22T15:09:15Z",
+      "type": "worktree_sync_skipped"
+    },
+    {
+      "mode": "continue",
+      "session_id": "01kvqy1tsn4qwnsa402c7gbja3",
+      "stage": "implementation",
+      "timestamp": "2026-06-22T15:09:15Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "exit_code": 143,
+      "session_id": "01kvqxx7rm8r70rmzppg070xsy",
+      "timed_out": false,
+      "timestamp": "2026-06-22T15:09:15Z",
+      "type": "agent_exited"
     }
   ],
+  "needsArchitecture": false,
+  "needsDesign": false,
+  "workflow": {
+    "tier": "standard",
+    "template": "full-feature",
+    "stages": [
+      "scope",
+      "implementation",
+      "review",
+      "release"
+    ],
+    "classifiedBy": "scope-agent",
+    "rationale": "UI changes present (TUI table and detail panel overhaul) but no dedicated design stage needed — this is a terminal UI where visual decisions are incremental edits to existing ratatui patterns, not a graphical design pass. Architecture skipped: all changes follow the existing add-a-field / propagate / display pattern across 6 files; no new system boundaries or cross-cutting structural decisions are required."
+  },
+  "stageApprovals": {
+    "scope": "2026-06-22T15:06:43Z"
+  },
+  "stageContent": {
+    "implementation": "## Phase 1: Thread article URLs through the data pipeline\n\n### Changes Made\n\n- `src/data/finnhub.rs`: Added `url: Option<String>` to `NewsItem`. Updated `get_top_catalyst()` return type to `Result<Option<(String, Option<String>, CatalystType)>>`. Empty-string URLs are coerced to `None` via `.filter(|u| !u.is_empty())`.\n- `src/models/setup.rs`: Added `catalyst_url: Option<String>` field after `catalyst_headline` in `Setup`. Updated `make_setup()` test helper to include `catalyst_url: None`.\n- `src/analysis/screener.rs`: Destructures the three-tuple from `get_top_catalyst()` into `(catalyst_headline, catalyst_url, catalyst)` and populates `catalyst_url` on `Setup`.\n- `src/main.rs`: Updated `symbol` subcommand to destructure the three-tuple and print `News URL: {url}` when `catalyst_url` is `Some`.\n\n### Verification\n\n- `cargo test`: 99 passed, 0 failed, 0 skipped\n- `cargo build`: no new warnings"
+  },
   "stages": {
-    "release": {
-      "status": "not_started"
+    "scope": {
+      "status": "approved",
+      "approvedAt": "2026-06-22T15:06:43Z",
+      "startedAt": "2026-06-22T15:01:47Z"
     },
     "review": {
       "status": "not_started"
     },
-    "design": {
-      "status": "not_started"
-    },
     "implementation": {
+      "status": "in_progress",
+      "startedAt": "2026-06-22T15:09:15Z"
+    },
+    "release": {
       "status": "not_started"
     },
     "architecture": {
-      "status": "not_started"
+      "status": "skipped"
     },
-    "scope": {
-      "status": "in_progress",
-      "startedAt": "2026-06-22T15:01:47Z"
+    "design": {
+      "status": "skipped"
     }
   },
   "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd",
   "worktreeBaseBranch": "master",
-  "worktreeLastSyncedAt": "2026-06-22T15:01:46Z"
+  "worktreeLastSyncedAt": "2026-06-22T15:09:15Z"
 }

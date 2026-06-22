@@ -3,7 +3,7 @@ defract:
   id: task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd
   type: improvement
   status: active
-  stage: scope
+  stage: implementation
   phase: 0
   total_phases: 3
   priority: normal
@@ -158,3 +158,19 @@ OSC 8 hyperlink format in Rust: `format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url
 The market session detection logic in `print_market_status()` (`src/main.rs:153`) computes the ET/MT/PT minute values and derives a session label. Extract this into a free function (e.g., `fn market_session() -> &'static str`) so `Dashboard::render_header()` can call it without duplicating the arithmetic.
 
 The Homebrew formula should target a GitHub releases URL pattern such as `https://github.com/{owner}/setups/releases/download/v{version}/setups-{arch}-apple-darwin.tar.gz`. Use `sha256 "PLACEHOLDER_SHA256"` with a comment explaining it must be replaced before publishing. The formula class name must be `Setups` (capitalized).
+
+## Implementation Notes
+
+## Phase 1: Thread article URLs through the data pipeline
+
+### Changes Made
+
+- `src/data/finnhub.rs`: Added `url: Option<String>` to `NewsItem`. Updated `get_top_catalyst()` return type to `Result<Option<(String, Option<String>, CatalystType)>>`. Empty-string URLs are coerced to `None` via `.filter(|u| !u.is_empty())`.
+- `src/models/setup.rs`: Added `catalyst_url: Option<String>` field after `catalyst_headline` in `Setup`. Updated `make_setup()` test helper to include `catalyst_url: None`.
+- `src/analysis/screener.rs`: Destructures the three-tuple from `get_top_catalyst()` into `(catalyst_headline, catalyst_url, catalyst)` and populates `catalyst_url` on `Setup`.
+- `src/main.rs`: Updated `symbol` subcommand to destructure the three-tuple and print `News URL: {url}` when `catalyst_url` is `Some`.
+
+### Verification
+
+- `cargo test`: 99 passed, 0 failed, 0 skipped
+- `cargo build`: no new warnings

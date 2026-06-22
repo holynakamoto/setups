@@ -6,6 +6,7 @@ This project uses [defract](https://defract.dev) for structured AI-assisted deve
 
 | Task | Stage | Status |
 |------|-------|--------|
+| TUI redesign, hyperlinks, and Homebrew packaging | scope | active |
 | Enhance setups tool with advanced trader analysis features | release | completed |
 
 
