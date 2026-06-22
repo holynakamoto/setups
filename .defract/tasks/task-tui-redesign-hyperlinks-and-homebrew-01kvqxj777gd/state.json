@@ -1,0 +1,89 @@
+{
+  "id": "task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd",
+  "status": "active",
+  "stage": "scope",
+  "phase": 0,
+  "totalPhases": 3,
+  "createdAt": "2026-06-22T15:00:43Z",
+  "updatedAt": "2026-06-22T15:05:34Z",
+  "events": [
+    {
+      "base_branch": "master",
+      "branch": "feature/task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd",
+      "path": "/Users/nickmoore/setups/.defract-worktrees/task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd",
+      "timestamp": "2026-06-22T15:00:44Z",
+      "type": "worktree_created"
+    },
+    {
+      "mode": "start",
+      "session_id": "01kvqxj7e3g3n2zzjhp3brtczt",
+      "stage": "scope",
+      "timestamp": "2026-06-22T15:00:44Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "change_summary": "Intent check: four-part task covering URL plumbing, TUI redesign, hyperlink interactions, and Homebrew packaging",
+      "revision": 1,
+      "timestamp": "2026-06-22T15:01:25Z",
+      "type": "scope_update"
+    },
+    {
+      "stage": "scope",
+      "summary": "Intent check pushed: four-part task — news URL plumbing, TUI visual redesign, hyperlink interactions (OSC 8 + browser keybind), and Homebrew packaging. Approve in the UI to continue to the full scope.",
+      "timestamp": "2026-06-22T15:01:28Z",
+      "type": "stage_work_complete",
+      "worktree_head": "97f54c54fca95e445a79594d9b99721c48b69013",
+      "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "base_branch": "master",
+      "reason": "already_up_to_date",
+      "timestamp": "2026-06-22T15:01:46Z",
+      "type": "worktree_sync_skipped"
+    },
+    {
+      "mode": "approve_initial",
+      "session_id": "01kvqxm4vst7zvjwhdvax5qs3g",
+      "stage": "scope",
+      "timestamp": "2026-06-22T15:01:47Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "exit_code": 143,
+      "session_id": "01kvqxj7e3g3n2zzjhp3brtczt",
+      "timed_out": false,
+      "timestamp": "2026-06-22T15:01:47Z",
+      "type": "agent_exited"
+    },
+    {
+      "change_summary": "Full scope: 14 requirements, 10 acceptance criteria, 3 implementation phases (URL plumbing → TUI redesign + hyperlinks → Homebrew packaging)",
+      "revision": 2,
+      "timestamp": "2026-06-22T15:05:34Z",
+      "type": "scope_update"
+    }
+  ],
+  "stages": {
+    "release": {
+      "status": "not_started"
+    },
+    "review": {
+      "status": "not_started"
+    },
+    "design": {
+      "status": "not_started"
+    },
+    "implementation": {
+      "status": "not_started"
+    },
+    "architecture": {
+      "status": "not_started"
+    },
+    "scope": {
+      "status": "in_progress",
+      "startedAt": "2026-06-22T15:01:47Z"
+    }
+  },
+  "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd",
+  "worktreeBaseBranch": "master",
+  "worktreeLastSyncedAt": "2026-06-22T15:01:46Z"
+}
