@@ -7,7 +7,7 @@ Pre-market trade setup scanner. Pulls quotes and news from Finnhub, scores each 
 ### Homebrew (macOS)
 
 ```sh
-brew tap holynakamoto/setups
+brew tap holynakamoto/setups https://github.com/holynakamoto/setups
 brew install setups
 ```
 
