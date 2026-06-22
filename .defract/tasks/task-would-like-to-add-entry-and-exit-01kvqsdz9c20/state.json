@@ -1,0 +1,71 @@
+{
+  "id": "task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
+  "status": "active",
+  "stage": "scope",
+  "phase": 0,
+  "totalPhases": 1,
+  "createdAt": "2026-06-22T13:48:30Z",
+  "updatedAt": "2026-06-22T13:48:30Z",
+  "events": [
+    {
+      "models": {
+        "architecture": "opus",
+        "design": "sonnet",
+        "implementation": "opus",
+        "release": "haiku",
+        "review": "sonnet",
+        "scope_full": "opus",
+        "scope_initial": "haiku"
+      },
+      "timestamp": "2026-06-22T13:48:30Z",
+      "type": "stage_models_updated"
+    },
+    {
+      "base_branch": "master",
+      "branch": "feature/task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
+      "path": "/Users/nickmoore/setups/.defract-worktrees/task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
+      "timestamp": "2026-06-22T13:48:30Z",
+      "type": "worktree_created"
+    },
+    {
+      "mode": "start",
+      "model": "haiku",
+      "session_id": "01kvqsdzjae2315bv613ej01tz",
+      "stage": "scope",
+      "timestamp": "2026-06-22T13:48:30Z",
+      "type": "stage_agent_started"
+    }
+  ],
+  "stages": {
+    "architecture": {
+      "status": "not_started"
+    },
+    "design": {
+      "status": "not_started"
+    },
+    "scope": {
+      "status": "in_progress",
+      "startedAt": "2026-06-22T13:48:30Z"
+    },
+    "release": {
+      "status": "not_started"
+    },
+    "review": {
+      "status": "not_started"
+    },
+    "implementation": {
+      "status": "not_started"
+    }
+  },
+  "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
+  "worktreeBaseBranch": "master",
+  "stageModels": {
+    "implementation": "opus",
+    "release": "haiku",
+    "review": "sonnet",
+    "scope_full": "opus",
+    "scope_initial": "haiku",
+    "architecture": "opus",
+    "design": "sonnet"
+  }
+}
