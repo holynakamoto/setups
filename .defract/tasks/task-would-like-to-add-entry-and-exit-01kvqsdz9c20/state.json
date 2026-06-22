@@ -1,11 +1,11 @@
 {
   "id": "task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
   "status": "active",
-  "stage": "implementation",
-  "phase": 1,
+  "stage": "review",
+  "phase": 2,
   "totalPhases": 2,
   "createdAt": "2026-06-22T13:48:30Z",
-  "updatedAt": "2026-06-22T14:13:36Z",
+  "updatedAt": "2026-06-22T14:28:35Z",
   "events": [
     {
       "models": {
@@ -436,6 +436,108 @@
       "type": "phase_awaiting_approval",
       "worktree_head": "f52f4e9e3832ef1f51f30dd8f6c358caa60d003a",
       "worktree_status_digest": "e9942661d696304a23431ff26a4f7b3118d357313020c586283fc7a8e20ecacf"
+    },
+    {
+      "approved_by": "user",
+      "phase": 1,
+      "phase_title": "Earnings awareness",
+      "timestamp": "2026-06-22T14:26:35Z",
+      "type": "phase_approved"
+    },
+    {
+      "checked_indices": [],
+      "phase": 1,
+      "timestamp": "2026-06-22T14:26:35Z",
+      "type": "manual_tests_checks_persisted"
+    },
+    {
+      "stage": "implementation",
+      "summary": "All phases approved — implementation ready for review.",
+      "timestamp": "2026-06-22T14:26:35Z",
+      "type": "stage_work_complete",
+      "worktree_head": "dc2aa101d948ed9e5e9741b066ce2fd945f2bf11",
+      "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "base_branch": "master",
+      "merged_commits": 2,
+      "timestamp": "2026-06-22T14:26:36Z",
+      "type": "worktree_synced"
+    },
+    {
+      "actor": null,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T14:26:35Z",
+      "type": "stage_approved"
+    },
+    {
+      "current_worktree_head": "d2f95615aa851d5e81d31ed22ca270bf9c88bf7e",
+      "current_worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stage": "implementation",
+      "stale_worktree_head": "dc2aa101d948ed9e5e9741b066ce2fd945f2bf11",
+      "stale_worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-06-22T14:26:36Z",
+      "type": "worktree_drift_detected",
+      "what_changed": "HEAD"
+    },
+    {
+      "action": "sweep",
+      "rationale": "Routine sync drift: HEAD fast-forwarded (stale HEAD is a strict ancestor of current) with a byte-identical dirty-status digest; swept forward automatically without waking an agent.",
+      "resolved_by": "auto",
+      "stage": "implementation",
+      "timestamp": "2026-06-22T14:26:36Z",
+      "type": "worktree_drift_resolved"
+    },
+    {
+      "from": "implementation",
+      "timestamp": "2026-06-22T14:26:36Z",
+      "to": "review",
+      "type": "stage_advanced"
+    },
+    {
+      "base_branch": "master",
+      "reason": "already_up_to_date",
+      "timestamp": "2026-06-22T14:26:36Z",
+      "type": "worktree_sync_skipped"
+    },
+    {
+      "mode": "start",
+      "model": "sonnet",
+      "session_id": "01kvqvkr0w0cg2sbd7xngvgk9w",
+      "stage": "review",
+      "timestamp": "2026-06-22T14:26:36Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "details": "cargo test: 99 passed (88 baseline + 5 trade_levels tests + 6 earnings_is_imminent tests), 0 failed. cargo build clean with no warnings.",
+      "failed": 0,
+      "passed": 99,
+      "phase": 2,
+      "skipped": 0,
+      "timestamp": "2026-06-22T14:27:49Z",
+      "type": "test_results"
+    },
+    {
+      "change_summary": "APPROVE: All 9 acceptance criteria pass with concrete code evidence. Both phases are complete: direction-aware trade levels render across all three output surfaces, and the earnings calendar integration degrades gracefully and bounds extra API calls to top_n. Build is clean with no warnings and 99 tests pass.",
+      "revision": 1,
+      "stage": "review",
+      "timestamp": "2026-06-22T14:28:24Z",
+      "type": "stage_content_updated"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Review verdict: APPROVE",
+      "rationale": "9/9 acceptance criteria passed, 2/2 automated checks passed. All trade levels render correctly across TUI detail, plain table, and symbol subcommand. Earnings calendar integration degrades gracefully, bounds API calls to top_n, and surfaces imminent flag and neutral placeholder as required. No security issues or convention violations found.",
+      "timestamp": "2026-06-22T14:28:30Z",
+      "type": "decision"
+    },
+    {
+      "stage": "review",
+      "summary": "APPROVE — all 9 acceptance criteria pass, both automated checks pass (99 tests, clean build). Trade levels and earnings calendar are fully implemented and wired across all three output surfaces.",
+      "timestamp": "2026-06-22T14:28:35Z",
+      "type": "stage_work_complete",
+      "worktree_head": "d2f95615aa851d5e81d31ed22ca270bf9c88bf7e",
+      "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
   "needsArchitecture": false,
@@ -453,44 +555,163 @@
     "rationale": "New user-visible functionality (entry/exit levels + earnings warnings) but tightly contained. Skipping design: all output extends existing TUI detail panel, plain table, and symbol-command patterns with no new presentation surface or visual-design decisions. Skipping architecture: changes are additive within established subsystems (data/analysis/models/ui) reusing existing config-threading, pure-function, and rate-limited-fetch patterns — no new system boundaries. Two phases warrant review (heuristic level placement; an added per-setup API call), so review and release stages are retained."
   },
   "stageApprovals": {
+    "implementation": "2026-06-22T14:26:35Z",
     "scope": "2026-06-22T14:01:01Z"
   },
   "stageContent": {
-    "implementation": "## Phase 2: Earnings awareness — complete\n\nEvery scored setup now carries its next upcoming earnings date and an imminent-earnings flag, surfaced across the plain table, the `symbol` subcommand, and the TUI detail panel. The fetch degrades gracefully and runs at most once per scored setup.\n\n### What was built\n\n- **`src/data/finnhub.rs`** — added `get_next_earnings(symbol) -> Option<NaiveDate>` hitting `/calendar/earnings?from=&to=&symbol=` over a 90-day horizon, reusing the shared `get<T>()` helper and the 1.1s rate-limit sleep. It degrades like `get_top_catalyst`: a failed or empty response resolves to `unwrap_or_default()` and the method returns the earliest non-past date (or `None`), never aborting the scan. Added `EarningsCalendarResp` (with `#[derive(Default)]`) and `EarningsEntry` deserialization structs.\n- **`src/models/setup.rs`** — added `next_earnings: Option<NaiveDate>` to `Setup`; a `Setup::earnings_imminent(window_days)` method; a free-standing pure `earnings_is_imminent(earnings, today, window_days)` predicate (past dates never count, today and the window boundary do); and `EARNINGS_IMMINENT_WINDOW_DAYS` (default 5). Six unit tests cover within-window, on-boundary, today, beyond-window, past-date, and the None case.\n- **`src/models/mod.rs`** — re-export `earnings_is_imminent` and `EARNINGS_IMMINENT_WINDOW_DAYS`.\n- **`src/analysis/screener.rs`** — sets `next_earnings: None` at build time, then after sorting and truncating to `top_n`, fetches the earnings date once per surviving setup. This bounds the extra calls to ≤ `top_n` (R12) rather than once per candidate.\n- **`src/main.rs`** — `print_table` gains an `EARNINGS` column (date, or \"—\", with a `SOON` suffix when imminent); the `Symbol` subcommand fetches and prints an `Earnings:` line with an `(imminent)` marker.\n- **`src/ui/dashboard.rs`** — `render_detail` gains an `Earnings` line showing the date (or \"—\"), bold-yellow with an `(imminent)` marker when within the window. Fits within the existing 10-line detail block.\n\n### Deviations from plan\n\n- None of substance. The imminence threshold lives in a shared `EARNINGS_IMMINENT_WINDOW_DAYS` constant rather than a CLI flag, since R9 specifies a fixed default window and no flag was requested.\n\n### Verification\n\n- `cargo build` clean, no new warnings.\n- `cargo test`: 99 passed (93 baseline + 6 new earnings tests).\n- Plain table shows an `EARNINGS` column; `symbol` and TUI detail show the earnings line; missing dates render \"—\".\n\n### Files changed\n\n`src/data/finnhub.rs`, `src/models/setup.rs`, `src/models/mod.rs`, `src/analysis/screener.rs`, `src/main.rs`, `src/ui/dashboard.rs`."
+    "implementation": "## Phase 2: Earnings awareness — complete\n\nEvery scored setup now carries its next upcoming earnings date and an imminent-earnings flag, surfaced across the plain table, the `symbol` subcommand, and the TUI detail panel. The fetch degrades gracefully and runs at most once per scored setup.\n\n### What was built\n\n- **`src/data/finnhub.rs`** — added `get_next_earnings(symbol) -> Option<NaiveDate>` hitting `/calendar/earnings?from=&to=&symbol=` over a 90-day horizon, reusing the shared `get<T>()` helper and the 1.1s rate-limit sleep. It degrades like `get_top_catalyst`: a failed or empty response resolves to `unwrap_or_default()` and the method returns the earliest non-past date (or `None`), never aborting the scan. Added `EarningsCalendarResp` (with `#[derive(Default)]`) and `EarningsEntry` deserialization structs.\n- **`src/models/setup.rs`** — added `next_earnings: Option<NaiveDate>` to `Setup`; a `Setup::earnings_imminent(window_days)` method; a free-standing pure `earnings_is_imminent(earnings, today, window_days)` predicate (past dates never count, today and the window boundary do); and `EARNINGS_IMMINENT_WINDOW_DAYS` (default 5). Six unit tests cover within-window, on-boundary, today, beyond-window, past-date, and the None case.\n- **`src/models/mod.rs`** — re-export `earnings_is_imminent` and `EARNINGS_IMMINENT_WINDOW_DAYS`.\n- **`src/analysis/screener.rs`** — sets `next_earnings: None` at build time, then after sorting and truncating to `top_n`, fetches the earnings date once per surviving setup. This bounds the extra calls to ≤ `top_n` (R12) rather than once per candidate.\n- **`src/main.rs`** — `print_table` gains an `EARNINGS` column (date, or \"—\", with a `SOON` suffix when imminent); the `Symbol` subcommand fetches and prints an `Earnings:` line with an `(imminent)` marker.\n- **`src/ui/dashboard.rs`** — `render_detail` gains an `Earnings` line showing the date (or \"—\"), bold-yellow with an `(imminent)` marker when within the window. Fits within the existing 10-line detail block.\n\n### Deviations from plan\n\n- None of substance. The imminence threshold lives in a shared `EARNINGS_IMMINENT_WINDOW_DAYS` constant rather than a CLI flag, since R9 specifies a fixed default window and no flag was requested.\n\n### Verification\n\n- `cargo build` clean, no new warnings.\n- `cargo test`: 99 passed (93 baseline + 6 new earnings tests).\n- Plain table shows an `EARNINGS` column; `symbol` and TUI detail show the earnings line; missing dates render \"—\".\n\n### Files changed\n\n`src/data/finnhub.rs`, `src/models/setup.rs`, `src/models/mod.rs`, `src/analysis/screener.rs`, `src/main.rs`, `src/ui/dashboard.rs`.",
+    "review": "## Verdict\n\n**Verdict:** APPROVE\n**Files reviewed:** 7 files changed across 2 phases\n\nAll 9 acceptance criteria pass with concrete code evidence. Both phases are complete: direction-aware trade levels render across all three output surfaces, and the earnings calendar integration degrades gracefully and bounds extra API calls to top_n. Build is clean with no warnings and 99 tests pass.\n\n### Automated Checks\n\n| Check | Result | Details |\n|-------|--------|---------|\n| cargo test | PASS | 99 passed, 0 failed, 0 skipped |\n| cargo build | PASS | Finished dev profile with no warnings in touched modules |\n\n### Acceptance Criteria (9/9 passed)\n\n- [x] AC-1: Running `cargo run -- --plain` shows an Entry, Stop, Target, and R:R value for each setup row; verified by inspecting the printed table. — PASS: main.rs:201 header includes ENTRY, STOP, TARGET, R:R columns; main.rs:228-237 row format prints s.levels.entry, s.levels.stop, s.levels.target, s.levels.risk_reward\n- [x] AC-2: For a gap-up (LONG) setup, the stop is below the entry and the target is above it; for a gap-down (SHORT) setup, the stop is above the entry and the target is below it; verified by a unit test over both directions. — PASS: indicators.rs:224-233 trade_levels_long_stop_below_target_above asserts stop < entry and target > entry; indicators.rs:236-245 trade_levels_short_stop_above_target_below asserts stop > entry and target < entry\n- [x] AC-3: `cargo run -- --stop-pct 10 --reward-mult 3` produces wider stops and proportionally further targets than the defaults; verified by comparing output for the same symbol. — PASS: main.rs:43-48 defines --stop-pct and --reward-mult flags; main.rs:84-85 threads them into ScreenerConfig; indicators.rs:254-259 unit test trade_levels_wider_stop_pushes_target_further verifies this property\n- [x] AC-4: The risk/reward ratio equals the reward multiple within rounding for the default model; verified by a unit test. — PASS: indicators.rs:247-251 trade_levels_risk_reward_equals_reward_mult asserts (levels.risk_reward - 3.0).abs() < EPS with entry=42, stop_pct=10, reward_mult=3\n- [x] AC-5: The level-computation function has unit tests covering LONG, SHORT, and a boundary (e.g. zero/near-zero gap) case; verified by `cargo test`. — PASS: indicators.rs:222-270 contains five tests: LONG, SHORT, R:R-equals-reward-mult, wider-knobs, and zero-price boundary; cargo test shows 99 passed\n- [x] AC-6: The TUI detail panel and the `cargo run -- symbol NVDA` output both display the entry, stop, target, and R:R; verified by running each. — PASS: dashboard.rs:218-235 render_detail shows Trade Plan, Entry, Stop (red), Target (green), R:R; main.rs:125-129 symbol subcommand prints Direction, Entry, Stop, Target, Risk/Reward\n- [x] AC-7: When a setup's company has earnings within the near-term window, an imminent-earnings indicator appears in the plain table and TUI detail; verified by running a scan during a known earnings week or with a stubbed date. — PASS: main.rs:210-219 appends SOON suffix when s.earnings_imminent(EARNINGS_IMMINENT_WINDOW_DAYS) is true; dashboard.rs:241-246 renders date with (imminent) in bold-yellow; setup.rs:219-225 six unit tests verify the predicate logic\n- [x] AC-8: A setup with no upcoming earnings date renders without error and shows a neutral placeholder (e.g. \"—\"); verified by running a scan. — PASS: main.rs:218 None arm returns \"—\".to_string(); main.rs:141 symbol subcommand returns \"—\"; dashboard.rs:250 renders Span::raw(\"—\") for None; setup.rs:254-257 unit test earnings_imminent_none_is_false\n- [x] AC-9: `cargo build` and `cargo test` succeed with no new warnings introduced for the touched modules; verified by running both. — PASS: cargo build output: Finished dev profile with no warnings; cargo test: 99 passed, 0 failed\n\n### Code Quality (Refactor Review)\n\nNo code quality issues found in changed files.\n\n### Security Assessment (Security Review)\n\nNo security issues found in changed files.\n\n### Decisions Made During Implementation\n\n- trade_levels takes is_long: bool rather than the direction &str; Setup carries owned TradeLevels (not Option) since every scanned setup always gets levels computed\n- Replaced file-level #![allow(dead_code)] with per-function #[allow(dead_code)] on the still-unused functions so trade_levels is genuinely verified as used\n- next_earnings stored as Option<chrono::NaiveDate>; fetched once per scored setup after truncation to top_n (not during candidate enrichment) to bound extra calls to <= top_n (R12)\n- Imminence threshold is a shared EARNINGS_IMMINENT_WINDOW_DAYS constant, not a CLI flag, since R9 specified a fixed default and no flag was requested\n\n## Required Changes\n\nNone.\n"
   },
   "stages": {
-    "architecture": {
-      "status": "skipped"
-    },
     "review": {
-      "status": "not_started"
+      "status": "awaiting_approval",
+      "startedAt": "2026-06-22T14:26:36Z"
     },
-    "design": {
+    "scope": {
+      "status": "approved",
+      "approvedAt": "2026-06-22T14:01:01Z",
+      "startedAt": "2026-06-22T13:51:55Z"
+    },
+    "architecture": {
       "status": "skipped"
     },
     "release": {
       "status": "not_started"
     },
     "implementation": {
-      "status": "in_progress",
+      "status": "approved",
+      "approvedAt": "2026-06-22T14:26:35Z",
       "startedAt": "2026-06-22T14:09:38Z"
     },
-    "scope": {
-      "status": "approved",
-      "approvedAt": "2026-06-22T14:01:01Z",
-      "startedAt": "2026-06-22T13:51:55Z"
+    "design": {
+      "status": "skipped"
     }
   },
   "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
   "worktreeBaseBranch": "master",
-  "worktreeLastSyncedAt": "2026-06-22T14:09:37Z",
+  "worktreeLastSyncedAt": "2026-06-22T14:26:36Z",
+  "reviewPayload": {
+    "verdict": "approve",
+    "summary": "All 9 acceptance criteria pass with concrete code evidence. Both phases are complete: direction-aware trade levels render across all three output surfaces, and the earnings calendar integration degrades gracefully and bounds extra API calls to top_n. Build is clean with no warnings and 99 tests pass.",
+    "filesReviewedCount": 7,
+    "phasesReviewedCount": 2,
+    "automatedChecks": [
+      {
+        "name": "cargo test",
+        "result": "pass",
+        "detail": "99 passed, 0 failed, 0 skipped"
+      },
+      {
+        "name": "cargo build",
+        "result": "pass",
+        "detail": "Finished dev profile with no warnings in touched modules"
+      }
+    ],
+    "acceptanceCriteria": [
+      {
+        "acId": "AC-1",
+        "text": "Running `cargo run -- --plain` shows an Entry, Stop, Target, and R:R value for each setup row; verified by inspecting the printed table.",
+        "status": "pass",
+        "evidence": "main.rs:201 header includes ENTRY, STOP, TARGET, R:R columns; main.rs:228-237 row format prints s.levels.entry, s.levels.stop, s.levels.target, s.levels.risk_reward"
+      },
+      {
+        "acId": "AC-2",
+        "text": "For a gap-up (LONG) setup, the stop is below the entry and the target is above it; for a gap-down (SHORT) setup, the stop is above the entry and the target is below it; verified by a unit test over both directions.",
+        "status": "pass",
+        "evidence": "indicators.rs:224-233 trade_levels_long_stop_below_target_above asserts stop < entry and target > entry; indicators.rs:236-245 trade_levels_short_stop_above_target_below asserts stop > entry and target < entry"
+      },
+      {
+        "acId": "AC-3",
+        "text": "`cargo run -- --stop-pct 10 --reward-mult 3` produces wider stops and proportionally further targets than the defaults; verified by comparing output for the same symbol.",
+        "status": "pass",
+        "evidence": "main.rs:43-48 defines --stop-pct and --reward-mult flags; main.rs:84-85 threads them into ScreenerConfig; indicators.rs:254-259 unit test trade_levels_wider_stop_pushes_target_further verifies this property"
+      },
+      {
+        "acId": "AC-4",
+        "text": "The risk/reward ratio equals the reward multiple within rounding for the default model; verified by a unit test.",
+        "status": "pass",
+        "evidence": "indicators.rs:247-251 trade_levels_risk_reward_equals_reward_mult asserts (levels.risk_reward - 3.0).abs() < EPS with entry=42, stop_pct=10, reward_mult=3"
+      },
+      {
+        "acId": "AC-5",
+        "text": "The level-computation function has unit tests covering LONG, SHORT, and a boundary (e.g. zero/near-zero gap) case; verified by `cargo test`.",
+        "status": "pass",
+        "evidence": "indicators.rs:222-270 contains five tests: LONG, SHORT, R:R-equals-reward-mult, wider-knobs, and zero-price boundary; cargo test shows 99 passed"
+      },
+      {
+        "acId": "AC-6",
+        "text": "The TUI detail panel and the `cargo run -- symbol NVDA` output both display the entry, stop, target, and R:R; verified by running each.",
+        "status": "pass",
+        "evidence": "dashboard.rs:218-235 render_detail shows Trade Plan, Entry, Stop (red), Target (green), R:R; main.rs:125-129 symbol subcommand prints Direction, Entry, Stop, Target, Risk/Reward"
+      },
+      {
+        "acId": "AC-7",
+        "text": "When a setup's company has earnings within the near-term window, an imminent-earnings indicator appears in the plain table and TUI detail; verified by running a scan during a known earnings week or with a stubbed date.",
+        "status": "pass",
+        "evidence": "main.rs:210-219 appends SOON suffix when s.earnings_imminent(EARNINGS_IMMINENT_WINDOW_DAYS) is true; dashboard.rs:241-246 renders date with (imminent) in bold-yellow; setup.rs:219-225 six unit tests verify the predicate logic"
+      },
+      {
+        "acId": "AC-8",
+        "text": "A setup with no upcoming earnings date renders without error and shows a neutral placeholder (e.g. \"—\"); verified by running a scan.",
+        "status": "pass",
+        "evidence": "main.rs:218 None arm returns \"—\".to_string(); main.rs:141 symbol subcommand returns \"—\"; dashboard.rs:250 renders Span::raw(\"—\") for None; setup.rs:254-257 unit test earnings_imminent_none_is_false"
+      },
+      {
+        "acId": "AC-9",
+        "text": "`cargo build` and `cargo test` succeed with no new warnings introduced for the touched modules; verified by running both.",
+        "status": "pass",
+        "evidence": "cargo build output: Finished dev profile with no warnings; cargo test: 99 passed, 0 failed"
+      }
+    ],
+    "headlineFindings": [],
+    "requiredChanges": [],
+    "codeQualityFindings": [],
+    "securityFindings": [],
+    "decisions": [
+      "trade_levels takes is_long: bool rather than the direction &str; Setup carries owned TradeLevels (not Option) since every scanned setup always gets levels computed",
+      "Replaced file-level #![allow(dead_code)] with per-function #[allow(dead_code)] on the still-unused functions so trade_levels is genuinely verified as used",
+      "next_earnings stored as Option<chrono::NaiveDate>; fetched once per scored setup after truncation to top_n (not during candidate enrichment) to bound extra calls to <= top_n (R12)",
+      "Imminence threshold is a shared EARNINGS_IMMINENT_WINDOW_DAYS constant, not a CLI flag, since R9 specified a fixed default and no flag was requested"
+    ],
+    "revision": 1,
+    "changeAnnotations": [
+      {
+        "file": "src/analysis/indicators.rs",
+        "note": "Adds the pure trade_levels() function with 5 unit tests; removes the blanket dead-code suppression in favour of per-function attributes so the new function is genuinely compiler-verified as used"
+      },
+      {
+        "file": "src/models/setup.rs",
+        "note": "Adds TradeLevels struct, owned levels field on Setup, optional next_earnings date field, earnings_imminent() method, and the free-standing earnings_is_imminent() predicate with 6 unit tests"
+      },
+      {
+        "file": "src/models/mod.rs",
+        "note": "Re-exports TradeLevels, earnings_is_imminent, and EARNINGS_IMMINENT_WINDOW_DAYS so call sites in main.rs and dashboard.rs can access them without qualifying the full path"
+      },
+      {
+        "file": "src/analysis/screener.rs",
+        "note": "Extends ScreenerConfig with stop_pct and reward_mult knobs; computes trade levels per setup during scan(); fetches next earnings date once per surviving setup after truncation to top_n"
+      },
+      {
+        "file": "src/main.rs",
+        "note": "Adds --stop-pct and --reward-mult CLI flags and threads them into ScreenerConfig; print_table gains ENTRY, STOP, TARGET, R:R, and EARNINGS columns; Symbol subcommand prints the five new fields"
+      },
+      {
+        "file": "src/ui/dashboard.rs",
+        "note": "render_detail gains a Trade Plan line showing entry/stop/target/R:R and an Earnings line with imminent marker, fitting within the existing 10-line detail block"
+      },
+      {
+        "file": "src/data/finnhub.rs",
+        "note": "Adds get_next_earnings() hitting /calendar/earnings over a 90-day horizon, reusing the shared get<T>() helper and 1.1s rate-limit sleep, degrading gracefully to None on failure"
+      }
+    ]
+  },
   "stageModels": {
-    "review": "sonnet",
-    "scope_full": "opus",
-    "release": "haiku",
     "architecture": "opus",
+    "review": "sonnet",
     "scope_initial": "haiku",
-    "implementation": "opus",
-    "design": "sonnet"
+    "design": "sonnet",
+    "release": "haiku",
+    "scope_full": "opus",
+    "implementation": "opus"
   }
 }
