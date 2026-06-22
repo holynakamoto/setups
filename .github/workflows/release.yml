@@ -68,16 +68,13 @@ jobs:
           echo "AARCH64_SHA=$AARCH64_SHA" >> "$GITHUB_ENV"
           echo "X86_64_SHA=$X86_64_SHA" >> "$GITHUB_ENV"
 
-      - name: Update formula checksums
-        run: |
-          sed -i '' "s/PLACEHOLDER_SHA256_AARCH64/$AARCH64_SHA/g" Formula/setups.rb
-          sed -i '' "s/PLACEHOLDER_SHA256_X86_64/$X86_64_SHA/g" Formula/setups.rb
-
       - name: Commit updated formula
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin master
+          sed -i '' "s/PLACEHOLDER_SHA256_AARCH64/$AARCH64_SHA/g" Formula/setups.rb
+          sed -i '' "s/PLACEHOLDER_SHA256_X86_64/$X86_64_SHA/g" Formula/setups.rb
           git add Formula/setups.rb
           git commit -m "chore: bump formula checksums for ${{ github.ref_name }}"
           git push origin master
