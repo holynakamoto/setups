@@ -5,7 +5,7 @@
   "phase": 0,
   "totalPhases": 1,
   "createdAt": "2026-06-22T15:26:41Z",
-  "updatedAt": "2026-06-22T15:27:34Z",
+  "updatedAt": "2026-06-22T15:32:29Z",
   "events": [
     {
       "base_branch": "master",
@@ -54,27 +54,89 @@
       "timed_out": false,
       "timestamp": "2026-06-22T15:27:34Z",
       "type": "agent_exited"
+    },
+    {
+      "change_summary": "Full scope: release CI pipeline with automated formula checksum update, 1 phase, bug-fix workflow",
+      "revision": 2,
+      "timestamp": "2026-06-22T15:31:57Z",
+      "type": "scope_update"
+    },
+    {
+      "rationale": "Fixes broken brew install behavior caused by missing CI and placeholder SHA256s — no new user-visible features (skip design), well-contained to 2 files in a single CI subsystem (skip architecture)",
+      "stages": [
+        "scope",
+        "implementation",
+        "review",
+        "release"
+      ],
+      "template": "bug-fix",
+      "tier": "standard",
+      "timestamp": "2026-06-22T15:32:07Z",
+      "type": "workflow_classified"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Use native macOS runners per target architecture rather than cross-compilation",
+      "rationale": "macos-14 (ARM) builds aarch64-apple-darwin natively; macos-13 (Intel) builds x86_64-apple-darwin natively. Avoids linker configuration, the `cross` crate, and SDK path complexity that frequently breaks in CI. Trade-off: two runner-minutes of wall time per release instead of one.",
+      "timestamp": "2026-06-22T15:32:12Z",
+      "type": "decision"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Automate formula SHA256 update inside the release workflow rather than leaving it as a manual post-release step",
+      "rationale": "The placeholder checksums are the root cause of the install failure. A manual update step would require the developer to remember to run it after every release and would leave the formula broken in the window between the release and the update. Automating via `sed` in the publish job eliminates that gap. Requires `contents: write` workflow permission and a direct commit to master.",
+      "timestamp": "2026-06-22T15:32:16Z",
+      "type": "decision"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Keep Formula/setups.rb in the main setups repo rather than creating a separate homebrew-setups tap repo",
+      "rationale": "The formula file already exists in this repo. Creating a separate homebrew-setups repo is additive infrastructure work outside the scope of fixing the broken install. The trade-off is that the short-form `brew tap holynakamoto/setups` command (which maps to homebrew-setups by convention) won't work; users need the full-URL form. Flagged in Out of Scope and Technical Notes as a natural follow-up.",
+      "timestamp": "2026-06-22T15:32:19Z",
+      "type": "decision"
+    },
+    {
+      "stage": "scope",
+      "summary": "Full scope written (revision 2). Root cause: Formula/setups.rb has placeholder SHA256s and no .github/ directory exists, so no binaries are ever published. Fix: one phase — create .github/workflows/release.yml (parallel native macOS builds for arm64 and x86_64, automated formula checksum update via sed, GitHub Release creation) and remove placeholder comments from the formula. Workflow classified as bug-fix/standard with no architecture or design stages. Three decisions logged: native runners over cross-compilation, automated formula update inside the workflow, and formula staying in the main repo. Key prerequisite called out: repository Settings → Actions → Workflow permissions must be set to read/write.",
+      "timestamp": "2026-06-22T15:32:29Z",
+      "type": "stage_work_complete",
+      "worktree_head": "d756e771ca815262364aa1c5c9ca954519acbb43",
+      "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
+  "needsArchitecture": false,
+  "needsDesign": false,
+  "workflow": {
+    "tier": "standard",
+    "template": "bug-fix",
+    "stages": [
+      "scope",
+      "implementation",
+      "review",
+      "release"
+    ],
+    "classifiedBy": "scope-agent",
+    "rationale": "Fixes broken brew install behavior caused by missing CI and placeholder SHA256s — no new user-visible features (skip design), well-contained to 2 files in a single CI subsystem (skip architecture)"
+  },
   "stages": {
-    "scope": {
-      "status": "in_progress",
-      "startedAt": "2026-06-22T15:27:33Z"
+    "review": {
+      "status": "not_started"
     },
     "implementation": {
       "status": "not_started"
     },
-    "architecture": {
-      "status": "not_started"
-    },
-    "design": {
-      "status": "not_started"
-    },
-    "review": {
-      "status": "not_started"
+    "scope": {
+      "status": "awaiting_approval",
+      "startedAt": "2026-06-22T15:27:33Z"
     },
     "release": {
       "status": "not_started"
+    },
+    "architecture": {
+      "status": "skipped"
+    },
+    "design": {
+      "status": "skipped"
     }
   },
   "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-debugging-brew-install-setups-failure-01kvqz1rzz42",
