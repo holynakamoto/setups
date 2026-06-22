@@ -6,7 +6,7 @@ This project uses [defract](https://defract.dev) for structured AI-assisted deve
 
 | Task | Stage | Status |
 |------|-------|--------|
-| Would like to add entry and exit positions, heat maps or matricies showing sh... | scope | active |
+| Enhance setups tool with advanced trader analysis features | release | completed |
 
 
 ## Reading without defract
