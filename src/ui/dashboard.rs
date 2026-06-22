@@ -19,13 +19,14 @@ pub struct Dashboard {
     setups: Vec<Setup>,
     table_state: TableState,
     selected_idx: usize,
+    session: &'static str,
 }
 
 impl Dashboard {
-    pub fn new(setups: Vec<Setup>) -> Self {
+    pub fn new(setups: Vec<Setup>, session: &'static str) -> Self {
         let mut table_state = TableState::default();
         table_state.select(Some(0));
-        Self { setups, table_state, selected_idx: 0 }
+        Self { setups, table_state, selected_idx: 0, session }
     }
 
     pub fn run(mut self) -> Result<()> {
@@ -45,6 +46,7 @@ impl Dashboard {
                         | (KeyCode::Char('c'), KeyModifiers::CONTROL) => break,
                         (KeyCode::Down | KeyCode::Char('j'), _) => self.next(),
                         (KeyCode::Up | KeyCode::Char('k'), _) => self.prev(),
+                        (KeyCode::Char('o'), _) => self.open_article(),
                         _ => {}
                     }
                 }
@@ -54,6 +56,15 @@ impl Dashboard {
         disable_raw_mode()?;
         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
         Ok(())
+    }
+
+    fn open_article(&self) {
+        if self.selected_idx >= self.setups.len() {
+            return;
+        }
+        if let Some(url) = &self.setups[self.selected_idx].catalyst_url {
+            let _ = std::process::Command::new("open").arg(url).spawn();
+        }
     }
 
     fn next(&mut self) {
@@ -95,6 +106,11 @@ impl Dashboard {
                 format!("{} setups found", self.setups.len()),
                 Style::default().fg(Color::Yellow),
             ),
+            Span::raw("  |  "),
+            Span::styled(
+                self.session,
+                Style::default().fg(Color::Green),
+            ),
         ]))
         .block(Block::default().borders(Borders::ALL));
         f.render_widget(title, area);
@@ -107,7 +123,7 @@ impl Dashboard {
             Cell::from("Gap %").style(Style::default().add_modifier(Modifier::BOLD)),
             Cell::from("RVOL").style(Style::default().add_modifier(Modifier::BOLD)),
             Cell::from("Float").style(Style::default().add_modifier(Modifier::BOLD)),
-            Cell::from("Short %").style(Style::default().add_modifier(Modifier::BOLD)),
+            Cell::from("Dir").style(Style::default().add_modifier(Modifier::BOLD)),
             Cell::from("Catalyst").style(Style::default().add_modifier(Modifier::BOLD)),
             Cell::from("Score").style(Style::default().add_modifier(Modifier::BOLD)),
             Cell::from("Grade").style(Style::default().add_modifier(Modifier::BOLD)),
@@ -128,6 +144,8 @@ impl Dashboard {
                     Some(f) => format!("{:.1}B", f as f64 / 1_000_000_000.0),
                     None => "N/A".to_string(),
                 };
+                let dir = s.direction();
+                let dir_color = if dir == "LONG" { Color::Green } else { Color::Red };
                 Row::new(vec![
                     Cell::from(s.ticker.symbol.clone())
                         .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
@@ -141,12 +159,7 @@ impl Dashboard {
                             Style::default()
                         }),
                     Cell::from(float_str),
-                    Cell::from(
-                        s.ticker
-                            .short_float_pct
-                            .map(|p| format!("{:.1}%", p))
-                            .unwrap_or_else(|| "N/A".to_string()),
-                    ),
+                    Cell::from(dir).style(Style::default().fg(dir_color)),
                     Cell::from(s.catalyst.to_string()),
                     Cell::from(format!("{:.0}", s.score.total))
                         .style(score_color(s.score.total)),
@@ -163,7 +176,7 @@ impl Dashboard {
                 Constraint::Length(8),
                 Constraint::Length(7),
                 Constraint::Length(8),
-                Constraint::Length(9),
+                Constraint::Length(7),
                 Constraint::Min(16),
                 Constraint::Length(7),
                 Constraint::Length(6),
@@ -190,6 +203,17 @@ impl Dashboard {
                 .unusual_options_puts
                 .map(|p| format!("${:.0}K", p / 1000.0))
                 .unwrap_or_else(|| "N/A".to_string());
+
+            let url_line = match &setup.catalyst_url {
+                Some(url) => {
+                    // Truncate URL to fit panel width (minus "  Link: " prefix and hint)
+                    let max_chars = area.width.saturating_sub(22) as usize;
+                    let truncated: String = url.chars().take(max_chars).collect();
+                    format!("{}  [o] open article", truncated)
+                }
+                None => "No link available".to_string(),
+            };
+
             vec![
                 Line::from(vec![
                     Span::styled(
@@ -208,6 +232,9 @@ impl Dashboard {
                 ]),
                 Line::from(vec![
                     Span::raw(format!("  News: {}", headline)),
+                ]),
+                Line::from(vec![
+                    Span::raw(format!("  Link: {}", url_line)),
                 ]),
                 Line::from(vec![
                     Span::raw(format!(
@@ -267,6 +294,8 @@ impl Dashboard {
             Span::raw("up  "),
             Span::styled("↓/j ", Style::default().fg(Color::Yellow)),
             Span::raw("down  "),
+            Span::styled("o ", Style::default().fg(Color::Yellow)),
+            Span::raw("open article  "),
             Span::styled("q ", Style::default().fg(Color::Yellow)),
             Span::raw("quit"),
         ]));

@@ -98,16 +98,16 @@ async fn main() -> Result<()> {
             if cli.plain || !is_interactive_tty() {
                 print_table(&setups);
             } else {
-                Dashboard::new(setups).run()?;
+                Dashboard::new(setups, market_session()).run()?;
             }
         }
         Command::Symbol { symbol } => {
             let client = FinnhubClient::new(api_key);
             let ticker = client.build_ticker_fresh(&symbol).await?;
-            let (headline, catalyst) = client
+            let (headline, catalyst_url, catalyst) = client
                 .get_top_catalyst(&symbol)
                 .await?
-                .unwrap_or_else(|| ("No recent news".to_string(), models::CatalystType::Unknown));
+                .unwrap_or_else(|| ("No recent news".to_string(), None, models::CatalystType::Unknown));
 
             println!("Symbol:          {}", ticker.symbol);
             println!("Pre-market:      ${:.2}", ticker.premarket_price);
@@ -144,10 +144,33 @@ async fn main() -> Result<()> {
 
             println!("Catalyst:        {}", catalyst);
             println!("News:            {}", headline);
+            if let Some(url) = catalyst_url {
+                println!("News URL:        {}", url);
+            }
         }
     }
 
     Ok(())
+}
+
+fn market_session() -> &'static str {
+    use chrono::{Datelike, Timelike, Utc, Weekday};
+    let now = Utc::now();
+    let weekday = now.weekday();
+    let utc_mins = now.hour() * 60 + now.minute();
+    let et_mins = (utc_mins + 24 * 60).saturating_sub(4 * 60) % (24 * 60);
+    let is_weekend = matches!(weekday, Weekday::Sat | Weekday::Sun);
+    let in_premarket = !is_weekend && et_mins >= 480 && et_mins < 570;
+    let in_regular = !is_weekend && et_mins >= 570 && et_mins < 960;
+    if is_weekend {
+        "Weekend"
+    } else if in_premarket {
+        "Pre-Market"
+    } else if in_regular {
+        "Regular Hours"
+    } else {
+        "After-Hours"
+    }
 }
 
 fn print_market_status() {
@@ -217,13 +240,17 @@ fn print_table(setups: &[Setup]) {
             }
             None => "—".to_string(),
         };
-        let news = s
+        let headline_text: String = s
             .catalyst_headline
             .as_deref()
             .unwrap_or("—")
             .chars()
             .take(40)
-            .collect::<String>();
+            .collect();
+        let news = match &s.catalyst_url {
+            Some(url) => format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, headline_text),
+            None => headline_text,
+        };
         println!(
             "{:<8} {:>8.2} {:>+7.1}% {:>5.1}x {:>9} {:>8.2} {:>8.2} {:>8.2} {:>5.2} {:>6.0}  {:<18}  {:>5}  {:<16}  {}",
             s.ticker.symbol,

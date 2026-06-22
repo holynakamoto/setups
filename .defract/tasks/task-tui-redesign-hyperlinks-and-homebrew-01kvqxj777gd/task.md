@@ -3,7 +3,7 @@ defract:
   id: task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd
   type: improvement
   status: active
-  stage: implementation
+  stage: release
   phase: 0
   total_phases: 3
   priority: normal
@@ -200,3 +200,93 @@ The Homebrew formula should target a GitHub releases URL pattern such as `https:
 - `README.md` contains `brew tap`, `brew install setups`, `FINNHUB_API_KEY`, and `.env.example` references
 - `cargo test`: 99 passed, 0 failed, 0 skipped
 - `cargo build`: no new warnings
+
+## Review
+
+## Verdict
+
+**Verdict:** APPROVE
+**Files reviewed:** 7 files changed across 3 phases
+
+All 10 acceptance criteria pass and all 3 automated checks pass. The URL plumbing, TUI redesign, and Homebrew packaging are correctly implemented with no security issues or blocking quality concerns.
+
+### Automated Checks
+
+| Check | Result | Details |
+|-------|--------|---------|
+| Test suite | PASS | 99 passed, 0 failed, 0 skipped |
+| Build | PASS | cargo build clean — no warnings |
+| Formula syntax | PASS | ruby -c Formula/setups.rb exits 0 with 'Syntax OK' |
+
+### Acceptance Criteria (10/10 passed)
+
+- [x] AC-1: NewsItem in src/data/finnhub.rs has url: Option<String>; cargo build succeeds with no new warnings — PASS: src/data/finnhub.rs:69 — `url: Option<String>` present in NewsItem struct. cargo build: clean.
+- [x] AC-2: get_top_catalyst() return type updated to include the URL; cargo test passes (all classify_headline tests still pass) — PASS: src/data/finnhub.rs:200 — return type is `Result<Option<(String, Option<String>, CatalystType)>>`. All 99 tests pass.
+- [x] AC-3: Setup struct has catalyst_url: Option<String>; cargo test passes with no regressions — PASS: src/models/setup.rs:90 — `pub catalyst_url: Option<String>` present. make_setup() test helper at line 135 includes `catalyst_url: None`. 99 tests pass.
+- [x] AC-4: TUI table shows Dir column (LONG in green, SHORT in red) where Short % previously appeared — PASS: src/ui/dashboard.rs:126 — `Cell::from("Dir")` header. Lines 147-162: dir derived from `setup.direction()`, colored green for LONG and red for SHORT via `dir_color`.
+- [x] AC-5: Pressing o in the TUI on a setup with a catalyst_url opens the article in the default macOS browser (no panic, no crash) — PASS: src/ui/dashboard.rs:61-67 — `open_article()` uses `std::process::Command::new("open").arg(url).spawn()`. Return value discarded via `let _` to swallow errors. Wired to KeyCode::Char('o') at line 49.
+- [x] AC-6: Pressing o in the TUI on a setup with no catalyst_url does nothing (no panic, no crash) — PASS: src/ui/dashboard.rs:65 — `if let Some(url) = &self.setups[self.selected_idx].catalyst_url` guards the spawn call; no URL means the branch is not taken.
+- [x] AC-7: TUI footer includes o  open article hint — PASS: src/ui/dashboard.rs:297-299 — `Span::styled("o ", ...)` followed by `Span::raw("open article  ")` in render_footer.
+- [x] AC-8: TUI detail panel shows the catalyst URL or No link available — PASS: src/ui/dashboard.rs:207-214 — Some(url) branch truncates URL and appends `[o] open article`; None branch renders `No link available`. Displayed at line 237 as `Link: {url_line}`.
+- [x] AC-9: --plain output includes OSC 8 escape sequences in the NEWS column for rows with a URL — PASS: src/main.rs:250-252 — `format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, headline_text)` wraps headlines when `catalyst_url` is Some. Cannot run live without API key, but the escape sequence is structurally correct.
+- [x] AC-10: ruby -c Formula/setups.rb exits 0; formula caveats block references FINNHUB_API_KEY — PASS: ruby -c Formula/setups.rb output: 'Syntax OK'. Formula/setups.rb:30 — `export FINNHUB_API_KEY=your_key_here` in caveats block.
+
+### Code Quality (Refactor Review)
+
+#### Duplicate logic
+
+- **INFO:** `src/main.rs:177` — print_market_status() contains its own copy of the ET-offset arithmetic and session boundaries even though market_session() was extracted to hold that logic. The two functions intentionally differ in label text but the arithmetic is identical. Suggested fix: Replace the duplicated arithmetic in print_market_status() with a call to market_session() for the session label, then append the verbose suffix text around it
+
+### Security Assessment (Security Review)
+
+No security issues found in changed files.
+
+### Decisions Made During Implementation
+
+- Replace Short% TUI column with Dir (LONG/SHORT) because Finnhub basic tier never returns short_float_pct, making the column always N/A.
+- Use std::process::Command::new("open") for browser launching — macOS-native, no extra crate required given Homebrew distribution targets macOS only.
+- Emit OSC 8 hyperlinks unconditionally in --plain mode; terminal capability detection is out of scope and non-supporting terminals silently ignore the sequences.
+- Formula/setups.rb uses placeholder SHA256 values; tap repo creation is out of scope — formula serves as the structural packaging artifact to be completed at first release.
+
+## Required Changes
+
+None.
+
+## Release
+
+## Release Notes
+
+### What was built
+- Threaded news article URLs from Finnhub's company-news API through the entire data pipeline (`NewsItem` → `get_top_catalyst()` → `Setup.catalyst_url`) so every display surface can show or open the source article
+- Redesigned the ratatui TUI dashboard: replaced the always-N/A "Short %" column with a color-coded "Dir" column (LONG in green, SHORT in red); added market session label (Pre-Market / Regular Hours / After-Hours / Weekend) to the header
+- Added `o` keybinding in the TUI to open the selected setup's catalyst article in the default macOS browser via `std::process::Command::new("open")`; detail panel shows the URL or "No link available"
+- Added OSC 8 terminal hyperlinks in `--plain` output, wrapping news headlines with clickable links for compatible terminals; non-supporting terminals ignore the sequences silently
+- Created `Formula/setups.rb` Homebrew formula skeleton with arm64/x86_64 bottle placeholders and a `caveats` block explaining `FINNHUB_API_KEY`; created `README.md` with full installation and usage documentation
+
+### Key decisions
+- Replace Short% TUI column with Dir (LONG/SHORT): Finnhub basic tier never returns `short_float_pct`, making the column always N/A — Dir surfaces data that is already computed and provides actionable signal
+- Use `std::process::Command::new("open")` for browser launching: macOS-native, no extra crate required given Homebrew distribution targets macOS only
+- Emit OSC 8 hyperlinks unconditionally in --plain mode: terminal capability detection is complex and non-standardized; non-supporting terminals silently ignore the escape sequences
+- `Formula/setups.rb` uses placeholder SHA256 values: no GitHub release binary exists yet; the formula serves as the structural packaging artifact to be completed at first release; tap repo creation is out of scope
+
+### Changes by phase
+- **Phase 1: Thread article URLs through the data pipeline** — Added `url: Option<String>` to `NewsItem` in `src/data/finnhub.rs`; updated `get_top_catalyst()` return type to `Result<Option<(String, Option<String>, CatalystType)>>`; added `catalyst_url: Option<String>` to `Setup` in `src/models/setup.rs`; wired through `Screener::scan()` in `src/analysis/screener.rs` and the `symbol` subcommand in `src/main.rs`. Empty-string URLs coerced to `None`. All 99 tests pass.
+- **Phase 2: TUI redesign and hyperlinks** — Replaced Short% column with color-coded Dir column in `src/ui/dashboard.rs`; added `open_article()` method using `std::process::Command::new("open")`; added `o` key handler; added market session label to header; added catalyst URL to detail panel with `[o] open article` hint or "No link available"; updated footer to include `o open article` hint. Extracted `market_session() -> &'static str` free function in `src/main.rs`; added OSC 8 hyperlink wrapping in `print_table()`. All 99 tests pass.
+- **Phase 3: Homebrew packaging** — Created `Formula/setups.rb` with class `Setups`, correct description and homepage for `holynakamoto/setups`, arm64 and x86_64 bottle placeholders with explanatory comments, `install` block, and `caveats` block referencing `FINNHUB_API_KEY`. Created `README.md` with Homebrew install section (`brew tap holynakamoto/setups` + `brew install setups`), API key setup instructions, from-source build steps, usage examples, and TUI keybindings table. `ruby -c Formula/setups.rb` exits 0.
+
+## Verification
+
+### Production Build
+PASS — `cargo build --release` completed with no warnings in 32s
+
+### Review Reference
+Approved by reviewer on 2026-06-22 — 10/10 acceptance criteria passed, 3/3 automated checks passed (cargo test 99/99, cargo build clean, ruby -c Syntax OK)
+
+### Release Checklist
+- [x] Approved review exists
+- [x] Production build passes
+- [x] Code committed and pushed
+- [x] Release notes prepared
+- [x] Stage content updated
+- [x] Completion event logged
+

@@ -73,10 +73,10 @@ impl Screener {
                 continue;
             }
 
-            let (catalyst_headline, catalyst) =
+            let (catalyst_headline, catalyst_url, catalyst) =
                 match self.finnhub.get_top_catalyst(&symbol).await {
-                    Ok(Some((h, c))) => (Some(h), c),
-                    _ => (None, CatalystType::Unknown),
+                    Ok(Some((h, u, c))) => (Some(h), u, c),
+                    _ => (None, None, CatalystType::Unknown),
                 };
 
             let score = score_setup(
@@ -101,6 +101,7 @@ impl Screener {
                 ticker,
                 catalyst,
                 catalyst_headline,
+                catalyst_url,
                 unusual_options_calls: None,
                 unusual_options_puts: None,
                 score,

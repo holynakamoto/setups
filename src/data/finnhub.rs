@@ -66,6 +66,7 @@ struct Metric {
 #[derive(Debug, Deserialize)]
 struct NewsItem {
     headline: String,
+    url: Option<String>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -196,7 +197,7 @@ impl FinnhubClient {
         self.build_ticker(symbol, &cached).await
     }
 
-    pub async fn get_top_catalyst(&self, symbol: &str) -> Result<Option<(String, CatalystType)>> {
+    pub async fn get_top_catalyst(&self, symbol: &str) -> Result<Option<(String, Option<String>, CatalystType)>> {
         use chrono::Utc;
         tokio::time::sleep(Duration::from_millis(1100)).await;
         let today = Utc::now().format("%Y-%m-%d").to_string();
@@ -213,7 +214,8 @@ impl FinnhubClient {
 
         Ok(items.into_iter().next().map(|item| {
             let catalyst = classify_headline(&item.headline);
-            (item.headline, catalyst)
+            let url = item.url.filter(|u| !u.is_empty());
+            (item.headline, url, catalyst)
         }))
     }
 
