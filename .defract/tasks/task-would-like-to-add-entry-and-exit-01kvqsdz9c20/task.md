@@ -153,31 +153,29 @@ Phase 2 builds on the model field plumbing established in Phase 1 but is otherwi
 
 ## Implementation Notes
 
-## Phase 1: Actionable entry and exit levels — complete
+## Phase 2: Earnings awareness — complete
 
-Every setup now carries a direction-aware trade plan (entry, stop, target, risk/reward), tunable via two new CLI flags, surfaced across all three output surfaces.
+Every scored setup now carries its next upcoming earnings date and an imminent-earnings flag, surfaced across the plain table, the `symbol` subcommand, and the TUI detail panel. The fetch degrades gracefully and runs at most once per scored setup.
 
 ### What was built
 
-- **`src/analysis/indicators.rs`** — added the pure `trade_levels(entry, is_long, stop_pct, reward_mult) -> TradeLevels` function. LONG places the stop `stop_pct` below entry and the target `stop_pct * reward_mult` above; SHORT mirrors it. R:R = reward distance / risk distance (equals `reward_mult` by construction). Guards a non-positive entry or stop_pct by returning a neutral plan. The file-level `#![allow(dead_code)]` was replaced with per-function `#[allow(dead_code)]` on the still-unused functions so `trade_levels` is genuinely compiler-verified as used. Five unit tests added: LONG, SHORT, R:R-equals-reward-mult, wider-knobs, and zero-price boundary.
-- **`src/models/setup.rs`** — added the `TradeLevels` struct (entry/stop/target/risk_reward, all `Serialize`/`Deserialize`) and an owned `levels: TradeLevels` field on `Setup`.
-- **`src/models/mod.rs`** — re-export `TradeLevels`.
-- **`src/analysis/screener.rs`** — `ScreenerConfig` gains `stop_pct` (default 5.0) and `reward_mult` (default 2.0); `scan()` computes `levels` per setup from `ticker.premarket_price` and `is_long = ticker.gap_pct() >= 0.0`.
-- **`src/main.rs`** — added `--stop-pct` and `--reward-mult` clap flags threaded into `ScreenerConfig`. `print_table` gains Entry/Stop/Target/R:R columns (SHORT% retained); the `Symbol` subcommand prints Direction, Entry, Stop, Target, Risk/Reward.
-- **`src/ui/dashboard.rs`** — `render_detail` gains a "Trade Plan" line with entry, color-coded stop (red) and target (green), and R:R, fitting within the existing 10-line detail block.
+- **`src/data/finnhub.rs`** — added `get_next_earnings(symbol) -> Option<NaiveDate>` hitting `/calendar/earnings?from=&to=&symbol=` over a 90-day horizon, reusing the shared `get<T>()` helper and the 1.1s rate-limit sleep. It degrades like `get_top_catalyst`: a failed or empty response resolves to `unwrap_or_default()` and the method returns the earliest non-past date (or `None`), never aborting the scan. Added `EarningsCalendarResp` (with `#[derive(Default)]`) and `EarningsEntry` deserialization structs.
+- **`src/models/setup.rs`** — added `next_earnings: Option<NaiveDate>` to `Setup`; a `Setup::earnings_imminent(window_days)` method; a free-standing pure `earnings_is_imminent(earnings, today, window_days)` predicate (past dates never count, today and the window boundary do); and `EARNINGS_IMMINENT_WINDOW_DAYS` (default 5). Six unit tests cover within-window, on-boundary, today, beyond-window, past-date, and the None case.
+- **`src/models/mod.rs`** — re-export `earnings_is_imminent` and `EARNINGS_IMMINENT_WINDOW_DAYS`.
+- **`src/analysis/screener.rs`** — sets `next_earnings: None` at build time, then after sorting and truncating to `top_n`, fetches the earnings date once per surviving setup. This bounds the extra calls to ≤ `top_n` (R12) rather than once per candidate.
+- **`src/main.rs`** — `print_table` gains an `EARNINGS` column (date, or "—", with a `SOON` suffix when imminent); the `Symbol` subcommand fetches and prints an `Earnings:` line with an `(imminent)` marker.
+- **`src/ui/dashboard.rs`** — `render_detail` gains an `Earnings` line showing the date (or "—"), bold-yellow with an `(imminent)` marker when within the window. Fits within the existing 10-line detail block.
 
 ### Deviations from plan
 
-- Decided against a compact TUI table column (the phase listed it as optional) to keep the existing table column constraints untouched; the detail panel carries the full plan.
-- `trade_levels` takes `is_long: bool` rather than the `direction()` `&str` to keep the pure function decoupled from the string format.
+- None of substance. The imminence threshold lives in a shared `EARNINGS_IMMINENT_WINDOW_DAYS` constant rather than a CLI flag, since R9 specifies a fixed default window and no flag was requested.
 
 ### Verification
 
 - `cargo build` clean, no new warnings.
-- `cargo test`: 93 passed (88 baseline + 5 new).
-- `--stop-pct`/`--reward-mult` flags present in `--help`.
+- `cargo test`: 99 passed (93 baseline + 6 new earnings tests).
+- Plain table shows an `EARNINGS` column; `symbol` and TUI detail show the earnings line; missing dates render "—".
 
 ### Files changed
 
-`src/analysis/indicators.rs`, `src/models/setup.rs`, `src/models/mod.rs`, `src/analysis/screener.rs`, `src/main.rs`, `src/ui/dashboard.rs`.
-
+`src/data/finnhub.rs`, `src/models/setup.rs`, `src/models/mod.rs`, `src/analysis/screener.rs`, `src/main.rs`, `src/ui/dashboard.rs`.

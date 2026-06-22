@@ -5,7 +5,7 @@
   "phase": 1,
   "totalPhases": 2,
   "createdAt": "2026-06-22T13:48:30Z",
-  "updatedAt": "2026-06-22T14:10:53Z",
+  "updatedAt": "2026-06-22T14:13:36Z",
   "events": [
     {
       "models": {
@@ -333,6 +333,109 @@
       "phase": 2,
       "timestamp": "2026-06-22T14:10:53Z",
       "type": "progress_report"
+    },
+    {
+      "description": "Running verification checks",
+      "percentage": 60,
+      "phase": 2,
+      "timestamp": "2026-06-22T14:12:40Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Running full check suite",
+      "percentage": 80,
+      "phase": 2,
+      "timestamp": "2026-06-22T14:12:50Z",
+      "type": "progress_report"
+    },
+    {
+      "details": "cargo test: 99 passed (93 baseline + 6 new). New tests cover earnings_is_imminent within-window, on-boundary, today, beyond-window, past-date, and None cases. cargo build clean with no new warnings in touched modules.",
+      "failed": 0,
+      "passed": 99,
+      "phase": 1,
+      "skipped": 0,
+      "timestamp": "2026-06-22T14:12:52Z",
+      "type": "test_results"
+    },
+    {
+      "alternatives_considered": [
+        "Store next_earnings as Option<String> (avoids NaiveDate but loses type-safe comparison)",
+        "Fetch earnings during candidate enrichment alongside the catalyst (would exceed the top_n call budget)"
+      ],
+      "decision": "Implementation: store next_earnings as Option<chrono::NaiveDate> on Setup and fetch it once per scored setup after sorting and truncating to top_n, not during candidate enrichment.",
+      "phase": 2,
+      "rationale": "Fetching after truncation guarantees the extra rate-limited call runs at most top_n times (R12), instead of up to top_n*2 candidate times. NaiveDate (chrono already has the serde feature) keeps the imminence comparison type-safe and serializable, matching the existing Serialize/Deserialize convention on models. earnings_is_imminent is a free-standing pure function so the window logic is unit-testable without the wall clock, while Setup::earnings_imminent wraps it for call sites that have a Setup.",
+      "timestamp": "2026-06-22T14:13:00Z",
+      "type": "decision"
+    },
+    {
+      "change_summary": "Phase 2 complete: Earnings awareness",
+      "revision": 2,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T14:13:15Z",
+      "type": "stage_content_updated"
+    },
+    {
+      "description": "Phase 2 implementation complete — awaiting approval",
+      "percentage": 100,
+      "phase": 2,
+      "timestamp": "2026-06-22T14:13:19Z",
+      "type": "progress_report"
+    },
+    {
+      "artifacts_created": [
+        "src/data/finnhub.rs",
+        "src/models/setup.rs",
+        "src/models/mod.rs",
+        "src/analysis/screener.rs",
+        "src/main.rs",
+        "src/ui/dashboard.rs"
+      ],
+      "phase": 1,
+      "summary": "Added earnings awareness to every scored setup. New get_next_earnings() on FinnhubClient hits /calendar/earnings over a 90-day horizon, reusing get<T>() and the 1.1s sleep, degrading gracefully to None. Setup gains an Option<NaiveDate> next_earnings field, an earnings_imminent() method, and a pure earnings_is_imminent() predicate (default 5-day window) with 6 unit tests. The screener fetches earnings once per scored setup after truncation (≤ top_n). Earnings date + imminent flag render in the plain table, the symbol subcommand, and the TUI detail panel. Build clean, 99 tests pass.",
+      "timestamp": "2026-06-22T14:13:23Z",
+      "type": "phase_completed"
+    },
+    {
+      "items": [
+        {
+          "description": "Run `cargo run -- --plain` and confirm each setup row now shows an `EARNINGS` column displaying a date (e.g. `2026-07-30`), or `—` when no upcoming date is known."
+        },
+        {
+          "description": "On a row whose company reports within 5 days, confirm the earnings cell shows the date followed by `SOON`; on rows further out, confirm only the bare date appears."
+        },
+        {
+          "description": "Run `cargo run -- symbol NVDA` and confirm an `Earnings:` line prints a date (with an `(imminent)` marker when within 5 days) or `—` when none is upcoming."
+        },
+        {
+          "description": "Launch the TUI with `cargo run`, select a setup, and confirm the detail panel's `Earnings:` line shows the date, rendered bold-yellow with `(imminent)` when within the window and `—` when unknown."
+        },
+        {
+          "description": "Confirm a symbol with no upcoming earnings (or when the `/calendar/earnings` call fails) renders `—` without error and the scan still completes."
+        },
+        {
+          "description": "Confirm `cargo test` reports `99 passed` and `cargo build` finishes with no warnings."
+        }
+      ],
+      "phase": 1,
+      "phase_title": "Earnings awareness",
+      "timestamp": "2026-06-22T14:13:30Z",
+      "type": "manual_tests"
+    },
+    {
+      "agent_phase": 2,
+      "phase_title": "Earnings awareness",
+      "server_phase": 1,
+      "timestamp": "2026-06-22T14:13:36Z",
+      "type": "phase_drift_detected"
+    },
+    {
+      "phase": 1,
+      "phase_title": "Earnings awareness",
+      "timestamp": "2026-06-22T14:13:36Z",
+      "type": "phase_awaiting_approval",
+      "worktree_head": "f52f4e9e3832ef1f51f30dd8f6c358caa60d003a",
+      "worktree_status_digest": "e9942661d696304a23431ff26a4f7b3118d357313020c586283fc7a8e20ecacf"
     }
   ],
   "needsArchitecture": false,
@@ -353,41 +456,41 @@
     "scope": "2026-06-22T14:01:01Z"
   },
   "stageContent": {
-    "implementation": "## Phase 1: Actionable entry and exit levels — complete\n\nEvery setup now carries a direction-aware trade plan (entry, stop, target, risk/reward), tunable via two new CLI flags, surfaced across all three output surfaces.\n\n### What was built\n\n- **`src/analysis/indicators.rs`** — added the pure `trade_levels(entry, is_long, stop_pct, reward_mult) -> TradeLevels` function. LONG places the stop `stop_pct` below entry and the target `stop_pct * reward_mult` above; SHORT mirrors it. R:R = reward distance / risk distance (equals `reward_mult` by construction). Guards a non-positive entry or stop_pct by returning a neutral plan. The file-level `#![allow(dead_code)]` was replaced with per-function `#[allow(dead_code)]` on the still-unused functions so `trade_levels` is genuinely compiler-verified as used. Five unit tests added: LONG, SHORT, R:R-equals-reward-mult, wider-knobs, and zero-price boundary.\n- **`src/models/setup.rs`** — added the `TradeLevels` struct (entry/stop/target/risk_reward, all `Serialize`/`Deserialize`) and an owned `levels: TradeLevels` field on `Setup`.\n- **`src/models/mod.rs`** — re-export `TradeLevels`.\n- **`src/analysis/screener.rs`** — `ScreenerConfig` gains `stop_pct` (default 5.0) and `reward_mult` (default 2.0); `scan()` computes `levels` per setup from `ticker.premarket_price` and `is_long = ticker.gap_pct() >= 0.0`.\n- **`src/main.rs`** — added `--stop-pct` and `--reward-mult` clap flags threaded into `ScreenerConfig`. `print_table` gains Entry/Stop/Target/R:R columns (SHORT% retained); the `Symbol` subcommand prints Direction, Entry, Stop, Target, Risk/Reward.\n- **`src/ui/dashboard.rs`** — `render_detail` gains a \"Trade Plan\" line with entry, color-coded stop (red) and target (green), and R:R, fitting within the existing 10-line detail block.\n\n### Deviations from plan\n\n- Decided against a compact TUI table column (the phase listed it as optional) to keep the existing table column constraints untouched; the detail panel carries the full plan.\n- `trade_levels` takes `is_long: bool` rather than the `direction()` `&str` to keep the pure function decoupled from the string format.\n\n### Verification\n\n- `cargo build` clean, no new warnings.\n- `cargo test`: 93 passed (88 baseline + 5 new).\n- `--stop-pct`/`--reward-mult` flags present in `--help`.\n\n### Files changed\n\n`src/analysis/indicators.rs`, `src/models/setup.rs`, `src/models/mod.rs`, `src/analysis/screener.rs`, `src/main.rs`, `src/ui/dashboard.rs`.\n"
+    "implementation": "## Phase 2: Earnings awareness — complete\n\nEvery scored setup now carries its next upcoming earnings date and an imminent-earnings flag, surfaced across the plain table, the `symbol` subcommand, and the TUI detail panel. The fetch degrades gracefully and runs at most once per scored setup.\n\n### What was built\n\n- **`src/data/finnhub.rs`** — added `get_next_earnings(symbol) -> Option<NaiveDate>` hitting `/calendar/earnings?from=&to=&symbol=` over a 90-day horizon, reusing the shared `get<T>()` helper and the 1.1s rate-limit sleep. It degrades like `get_top_catalyst`: a failed or empty response resolves to `unwrap_or_default()` and the method returns the earliest non-past date (or `None`), never aborting the scan. Added `EarningsCalendarResp` (with `#[derive(Default)]`) and `EarningsEntry` deserialization structs.\n- **`src/models/setup.rs`** — added `next_earnings: Option<NaiveDate>` to `Setup`; a `Setup::earnings_imminent(window_days)` method; a free-standing pure `earnings_is_imminent(earnings, today, window_days)` predicate (past dates never count, today and the window boundary do); and `EARNINGS_IMMINENT_WINDOW_DAYS` (default 5). Six unit tests cover within-window, on-boundary, today, beyond-window, past-date, and the None case.\n- **`src/models/mod.rs`** — re-export `earnings_is_imminent` and `EARNINGS_IMMINENT_WINDOW_DAYS`.\n- **`src/analysis/screener.rs`** — sets `next_earnings: None` at build time, then after sorting and truncating to `top_n`, fetches the earnings date once per surviving setup. This bounds the extra calls to ≤ `top_n` (R12) rather than once per candidate.\n- **`src/main.rs`** — `print_table` gains an `EARNINGS` column (date, or \"—\", with a `SOON` suffix when imminent); the `Symbol` subcommand fetches and prints an `Earnings:` line with an `(imminent)` marker.\n- **`src/ui/dashboard.rs`** — `render_detail` gains an `Earnings` line showing the date (or \"—\"), bold-yellow with an `(imminent)` marker when within the window. Fits within the existing 10-line detail block.\n\n### Deviations from plan\n\n- None of substance. The imminence threshold lives in a shared `EARNINGS_IMMINENT_WINDOW_DAYS` constant rather than a CLI flag, since R9 specifies a fixed default window and no flag was requested.\n\n### Verification\n\n- `cargo build` clean, no new warnings.\n- `cargo test`: 99 passed (93 baseline + 6 new earnings tests).\n- Plain table shows an `EARNINGS` column; `symbol` and TUI detail show the earnings line; missing dates render \"—\".\n\n### Files changed\n\n`src/data/finnhub.rs`, `src/models/setup.rs`, `src/models/mod.rs`, `src/analysis/screener.rs`, `src/main.rs`, `src/ui/dashboard.rs`."
   },
   "stages": {
-    "release": {
-      "status": "not_started"
+    "architecture": {
+      "status": "skipped"
     },
     "review": {
+      "status": "not_started"
+    },
+    "design": {
+      "status": "skipped"
+    },
+    "release": {
       "status": "not_started"
     },
     "implementation": {
       "status": "in_progress",
       "startedAt": "2026-06-22T14:09:38Z"
     },
-    "architecture": {
-      "status": "skipped"
-    },
     "scope": {
       "status": "approved",
       "approvedAt": "2026-06-22T14:01:01Z",
       "startedAt": "2026-06-22T13:51:55Z"
-    },
-    "design": {
-      "status": "skipped"
     }
   },
   "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
   "worktreeBaseBranch": "master",
   "worktreeLastSyncedAt": "2026-06-22T14:09:37Z",
   "stageModels": {
-    "design": "sonnet",
+    "review": "sonnet",
+    "scope_full": "opus",
+    "release": "haiku",
     "architecture": "opus",
     "scope_initial": "haiku",
-    "release": "haiku",
     "implementation": "opus",
-    "scope_full": "opus",
-    "review": "sonnet"
+    "design": "sonnet"
   }
 }
