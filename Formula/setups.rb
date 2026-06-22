@@ -6,13 +6,11 @@ class Setups < Formula
 
   on_macos do
     on_arm do
-      # Replace PLACEHOLDER_SHA256 with the sha256 of the arm64 tarball before publishing.
       url "https://github.com/holynakamoto/setups/releases/download/v#{version}/setups-aarch64-apple-darwin.tar.gz"
       sha256 "PLACEHOLDER_SHA256_AARCH64"
     end
 
     on_intel do
-      # Replace PLACEHOLDER_SHA256 with the sha256 of the x86_64 tarball before publishing.
       url "https://github.com/holynakamoto/setups/releases/download/v#{version}/setups-x86_64-apple-darwin.tar.gz"
       sha256 "PLACEHOLDER_SHA256_X86_64"
     end
