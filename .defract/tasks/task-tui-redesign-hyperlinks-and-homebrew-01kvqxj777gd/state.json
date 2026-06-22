@@ -2,10 +2,10 @@
   "id": "task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd",
   "status": "active",
   "stage": "implementation",
-  "phase": 1,
+  "phase": 2,
   "totalPhases": 3,
   "createdAt": "2026-06-22T15:00:43Z",
-  "updatedAt": "2026-06-22T15:09:15Z",
+  "updatedAt": "2026-06-22T15:16:51Z",
   "events": [
     {
       "base_branch": "master",
@@ -309,6 +309,212 @@
       "timed_out": false,
       "timestamp": "2026-06-22T15:09:15Z",
       "type": "agent_exited"
+    },
+    {
+      "note": "Starting Phase 2: TUI redesign and hyperlinks",
+      "phase": 1,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T15:11:52Z",
+      "type": "work_resumed"
+    },
+    {
+      "description": "Starting phase 2: TUI redesign and hyperlinks",
+      "percentage": 0,
+      "phase": 2,
+      "timestamp": "2026-06-22T15:11:56Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Implementing changes to dashboard.rs and main.rs",
+      "percentage": 20,
+      "phase": 2,
+      "timestamp": "2026-06-22T15:11:59Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Running verification checks",
+      "percentage": 60,
+      "phase": 2,
+      "timestamp": "2026-06-22T15:13:13Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Running full check suite",
+      "percentage": 80,
+      "phase": 2,
+      "timestamp": "2026-06-22T15:13:21Z",
+      "type": "progress_report"
+    },
+    {
+      "details": "99 tests pass, 0 failures. cargo build produces no new warnings.",
+      "failed": 0,
+      "passed": 99,
+      "phase": 1,
+      "skipped": 0,
+      "timestamp": "2026-06-22T15:13:24Z",
+      "type": "test_results"
+    },
+    {
+      "description": "Phase 2 implementation complete — awaiting approval",
+      "percentage": 100,
+      "phase": 2,
+      "timestamp": "2026-06-22T15:13:27Z",
+      "type": "progress_report"
+    },
+    {
+      "change_summary": "Phase 2 complete: TUI redesign and hyperlinks",
+      "revision": 2,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T15:13:42Z",
+      "type": "stage_content_updated"
+    },
+    {
+      "artifacts_created": [
+        "src/ui/dashboard.rs",
+        "src/main.rs"
+      ],
+      "phase": 1,
+      "summary": "TUI table now shows a \"Dir\" column (LONG green / SHORT red) replacing the always-N/A Short% column. Dashboard accepts a market session label and displays it in the header. Pressing `o` opens the selected setup's catalyst URL in the default browser via `open`; pressing `o` with no URL does nothing. The detail panel shows the URL (truncated) with a `[o] open article` hint, or \"No link available\". The footer includes the `o` keybinding hint. The `--plain` table wraps headlines in OSC 8 hyperlinks when a URL is present. A new `market_session()` function in main.rs is shared with the dashboard.",
+      "timestamp": "2026-06-22T15:13:48Z",
+      "type": "phase_completed"
+    },
+    {
+      "items": [
+        {
+          "description": "Run `cargo run` (with a valid `FINNHUB_API_KEY` in `.env`) and verify the TUI table shows a \"Dir\" column header where \"Short %\" used to appear, with each cell showing \"LONG\" in green or \"SHORT\" in red."
+        },
+        {
+          "description": "In the TUI, navigate to a setup that has a catalyst URL (any setup that shows a URL in the detail panel) and press `o` — confirm the article opens in the default browser without crashing the TUI."
+        },
+        {
+          "description": "In the TUI, navigate to a setup showing \"No link available\" in the detail panel and press `o` — confirm nothing happens and the TUI continues running normally."
+        },
+        {
+          "description": "Verify the TUI footer line reads: `↑/k up  ↓/j down  o open article  q quit`."
+        },
+        {
+          "description": "Verify the TUI header shows the market session label (e.g., \"Pre-Market\", \"Regular Hours\", \"After-Hours\", or \"Weekend\") after the setup count."
+        },
+        {
+          "description": "Verify the TUI detail panel shows either a (possibly truncated) URL followed by `[o] open article`, or the text \"No link available\" for the selected setup."
+        },
+        {
+          "description": "Run `cargo run -- --plain 2>/dev/null | cat -v` and confirm rows with a catalyst URL show `^[]8;;http` escape sequences in the NEWS column; rows without a URL show plain text."
+        }
+      ],
+      "phase": 1,
+      "phase_title": "TUI redesign and hyperlinks",
+      "timestamp": "2026-06-22T15:13:59Z",
+      "type": "manual_tests"
+    },
+    {
+      "agent_phase": 2,
+      "phase_title": "TUI redesign and hyperlinks",
+      "server_phase": 1,
+      "timestamp": "2026-06-22T15:14:04Z",
+      "type": "phase_drift_detected"
+    },
+    {
+      "phase": 1,
+      "phase_title": "TUI redesign and hyperlinks",
+      "timestamp": "2026-06-22T15:14:04Z",
+      "type": "phase_awaiting_approval",
+      "worktree_head": "a057223c8d4a30196a59cb06177ba5ef7ea86935",
+      "worktree_status_digest": "c40237ab6e0c8c19d8700d27c0f1c14d6b22ab72771235907faa8fd7391c8ed4"
+    },
+    {
+      "approved_by": "user",
+      "phase": 1,
+      "phase_title": "TUI redesign and hyperlinks",
+      "timestamp": "2026-06-22T15:14:35Z",
+      "type": "phase_approved"
+    },
+    {
+      "checked_indices": [],
+      "phase": 1,
+      "timestamp": "2026-06-22T15:14:35Z",
+      "type": "manual_tests_checks_persisted"
+    },
+    {
+      "base_branch": "master",
+      "merged_commits": 1,
+      "timestamp": "2026-06-22T15:14:36Z",
+      "type": "worktree_synced"
+    },
+    {
+      "mode": "continue",
+      "session_id": "01kvqybm3rnqpfyp16v00b076e",
+      "stage": "implementation",
+      "timestamp": "2026-06-22T15:14:36Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "note": "Starting Phase 3: Homebrew packaging — creating Formula/setups.rb and README.md",
+      "phase": 2,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T15:14:58Z",
+      "type": "work_resumed"
+    },
+    {
+      "description": "Starting phase 3: Homebrew packaging",
+      "percentage": 0,
+      "phase": 3,
+      "timestamp": "2026-06-22T15:15:06Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Implementing core changes: Formula/setups.rb and README.md",
+      "percentage": 20,
+      "phase": 3,
+      "timestamp": "2026-06-22T15:15:26Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Running verification checks",
+      "percentage": 60,
+      "phase": 3,
+      "timestamp": "2026-06-22T15:15:50Z",
+      "type": "progress_report"
+    },
+    {
+      "description": "Running full check suite",
+      "percentage": 80,
+      "phase": 3,
+      "timestamp": "2026-06-22T15:16:04Z",
+      "type": "progress_report"
+    },
+    {
+      "details": "99 tests pass, 0 failures. cargo build produces no new warnings. ruby -c Formula/setups.rb exits 0.",
+      "failed": 0,
+      "passed": 99,
+      "phase": 2,
+      "skipped": 0,
+      "timestamp": "2026-06-22T15:16:23Z",
+      "type": "test_results"
+    },
+    {
+      "description": "Phase 3 implementation complete — awaiting approval",
+      "percentage": 100,
+      "phase": 3,
+      "timestamp": "2026-06-22T15:16:26Z",
+      "type": "progress_report"
+    },
+    {
+      "change_summary": "Phase 3 complete: Homebrew packaging",
+      "revision": 3,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T15:16:47Z",
+      "type": "stage_content_updated"
+    },
+    {
+      "artifacts_created": [
+        "Formula/setups.rb",
+        "README.md"
+      ],
+      "phase": 2,
+      "summary": "Created Formula/setups.rb with complete Homebrew formula skeleton (class Setups, arm64+x86_64 bottle placeholders, caveats block referencing FINNHUB_API_KEY) and README.md with Homebrew install instructions, usage docs, and keybindings table. ruby -c exits 0; all 99 tests pass.",
+      "timestamp": "2026-06-22T15:16:51Z",
+      "type": "phase_completed"
     }
   ],
   "needsArchitecture": false,
@@ -329,9 +535,19 @@
     "scope": "2026-06-22T15:06:43Z"
   },
   "stageContent": {
-    "implementation": "## Phase 1: Thread article URLs through the data pipeline\n\n### Changes Made\n\n- `src/data/finnhub.rs`: Added `url: Option<String>` to `NewsItem`. Updated `get_top_catalyst()` return type to `Result<Option<(String, Option<String>, CatalystType)>>`. Empty-string URLs are coerced to `None` via `.filter(|u| !u.is_empty())`.\n- `src/models/setup.rs`: Added `catalyst_url: Option<String>` field after `catalyst_headline` in `Setup`. Updated `make_setup()` test helper to include `catalyst_url: None`.\n- `src/analysis/screener.rs`: Destructures the three-tuple from `get_top_catalyst()` into `(catalyst_headline, catalyst_url, catalyst)` and populates `catalyst_url` on `Setup`.\n- `src/main.rs`: Updated `symbol` subcommand to destructure the three-tuple and print `News URL: {url}` when `catalyst_url` is `Some`.\n\n### Verification\n\n- `cargo test`: 99 passed, 0 failed, 0 skipped\n- `cargo build`: no new warnings"
+    "implementation": "## Phase 1: Thread article URLs through the data pipeline\n\n### Changes Made\n\n- `src/data/finnhub.rs`: Added `url: Option<String>` to `NewsItem`. Updated `get_top_catalyst()` return type to `Result<Option<(String, Option<String>, CatalystType)>>`. Empty-string URLs are coerced to `None` via `.filter(|u| !u.is_empty())`.\n- `src/models/setup.rs`: Added `catalyst_url: Option<String>` field after `catalyst_headline` in `Setup`. Updated `make_setup()` test helper to include `catalyst_url: None`.\n- `src/analysis/screener.rs`: Destructures the three-tuple from `get_top_catalyst()` into `(catalyst_headline, catalyst_url, catalyst)` and populates `catalyst_url` on `Setup`.\n- `src/main.rs`: Updated `symbol` subcommand to destructure the three-tuple and print `News URL: {url}` when `catalyst_url` is `Some`.\n\n### Verification\n\n- `cargo test`: 99 passed, 0 failed, 0 skipped\n- `cargo build`: no new warnings\n\n## Phase 2: TUI redesign and hyperlinks\n\n### Changes Made\n\n- `src/ui/dashboard.rs`: Replaced \"Short %\" column header and cell (which was always N/A) with \"Dir\" column showing \"LONG\" in green and \"SHORT\" in red, derived from `setup.direction()`. Added `open_article()` method using `std::process::Command::new(\"open\")`. Added `o` key handler in the event loop. Added market session label to the header. Added catalyst URL line to the detail panel (truncated to fit width, with `[o] open article` hint when URL present, or \"No link available\" when absent). Updated footer to include `o  open article` hint. Added `session: &'static str` field to `Dashboard` struct, populated at construction.\n- `src/main.rs`: Added `market_session() -> &'static str` free function extracting session-detection logic from `print_market_status()`. Updated `Dashboard::new()` call to pass `market_session()`. Added OSC 8 hyperlink wrapping in `print_table()` for news headlines when `catalyst_url` is `Some`.\n\n### Verification\n\n- `cargo test`: 99 passed, 0 failed, 0 skipped\n- `cargo build`: no new warnings\n\n## Phase 3: Homebrew packaging\n\n### Changes Made\n\n- `Formula/setups.rb` (new): Complete Homebrew formula skeleton with `Setups` class, correct description and homepage for `holynakamoto/setups`, placeholder `sha256` values with comments for both `aarch64` and `x86_64` macOS targets, `install` block copying the binary, and a `caveats` block explaining `FINNHUB_API_KEY` with a pointer to `.env.example`.\n- `README.md` (new): Full README with Homebrew installation section (`brew tap holynakamoto/setups` + `brew install setups`), `FINNHUB_API_KEY` setup instructions, pointer to `.env.example`, from-source build instructions, usage examples, and TUI keybindings table.\n\n### Verification\n\n- `ruby -c Formula/setups.rb`: Syntax OK\n- `README.md` contains `brew tap`, `brew install setups`, `FINNHUB_API_KEY`, and `.env.example` references\n- `cargo test`: 99 passed, 0 failed, 0 skipped\n- `cargo build`: no new warnings"
   },
   "stages": {
+    "release": {
+      "status": "not_started"
+    },
+    "implementation": {
+      "status": "in_progress",
+      "startedAt": "2026-06-22T15:14:36Z"
+    },
+    "architecture": {
+      "status": "skipped"
+    },
     "scope": {
       "status": "approved",
       "approvedAt": "2026-06-22T15:06:43Z",
@@ -340,21 +556,11 @@
     "review": {
       "status": "not_started"
     },
-    "implementation": {
-      "status": "in_progress",
-      "startedAt": "2026-06-22T15:09:15Z"
-    },
-    "release": {
-      "status": "not_started"
-    },
-    "architecture": {
-      "status": "skipped"
-    },
     "design": {
       "status": "skipped"
     }
   },
   "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-tui-redesign-hyperlinks-and-homebrew-01kvqxj777gd",
   "worktreeBaseBranch": "master",
-  "worktreeLastSyncedAt": "2026-06-22T15:09:15Z"
+  "worktreeLastSyncedAt": "2026-06-22T15:14:36Z"
 }

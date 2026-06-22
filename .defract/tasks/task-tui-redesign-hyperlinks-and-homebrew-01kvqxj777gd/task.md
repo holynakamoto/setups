@@ -174,3 +174,29 @@ The Homebrew formula should target a GitHub releases URL pattern such as `https:
 
 - `cargo test`: 99 passed, 0 failed, 0 skipped
 - `cargo build`: no new warnings
+
+## Phase 2: TUI redesign and hyperlinks
+
+### Changes Made
+
+- `src/ui/dashboard.rs`: Replaced "Short %" column header and cell (which was always N/A) with "Dir" column showing "LONG" in green and "SHORT" in red, derived from `setup.direction()`. Added `open_article()` method using `std::process::Command::new("open")`. Added `o` key handler in the event loop. Added market session label to the header. Added catalyst URL line to the detail panel (truncated to fit width, with `[o] open article` hint when URL present, or "No link available" when absent). Updated footer to include `o  open article` hint. Added `session: &'static str` field to `Dashboard` struct, populated at construction.
+- `src/main.rs`: Added `market_session() -> &'static str` free function extracting session-detection logic from `print_market_status()`. Updated `Dashboard::new()` call to pass `market_session()`. Added OSC 8 hyperlink wrapping in `print_table()` for news headlines when `catalyst_url` is `Some`.
+
+### Verification
+
+- `cargo test`: 99 passed, 0 failed, 0 skipped
+- `cargo build`: no new warnings
+
+## Phase 3: Homebrew packaging
+
+### Changes Made
+
+- `Formula/setups.rb` (new): Complete Homebrew formula skeleton with `Setups` class, correct description and homepage for `holynakamoto/setups`, placeholder `sha256` values with comments for both `aarch64` and `x86_64` macOS targets, `install` block copying the binary, and a `caveats` block explaining `FINNHUB_API_KEY` with a pointer to `.env.example`.
+- `README.md` (new): Full README with Homebrew installation section (`brew tap holynakamoto/setups` + `brew install setups`), `FINNHUB_API_KEY` setup instructions, pointer to `.env.example`, from-source build instructions, usage examples, and TUI keybindings table.
+
+### Verification
+
+- `ruby -c Formula/setups.rb`: Syntax OK
+- `README.md` contains `brew tap`, `brew install setups`, `FINNHUB_API_KEY`, and `.env.example` references
+- `cargo test`: 99 passed, 0 failed, 0 skipped
+- `cargo build`: no new warnings
