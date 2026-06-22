@@ -3,7 +3,7 @@ defract:
   id: task-would-like-to-add-entry-and-exit-01kvqsdz9c20
   type: task
   status: active
-  stage: scope
+  stage: implementation
   phase: 0
   total_phases: 2
   priority: normal
@@ -13,6 +13,7 @@ defract:
   created_by: holynakamoto
   assignee: holynakamoto
 ---
+
 
 ## Story Brief
 
