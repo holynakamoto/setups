@@ -3,6 +3,7 @@ use tracing::info;
 use crate::data::FinnhubClient;
 use crate::models::{Setup, CatalystType};
 use crate::analysis::scoring::score_setup;
+use crate::analysis::indicators::trade_levels;
 
 pub struct Screener {
     finnhub: FinnhubClient,
@@ -14,6 +15,8 @@ pub struct ScreenerConfig {
     pub min_price: f64,
     pub max_price: f64,
     pub top_n: usize,
+    pub stop_pct: f64,
+    pub reward_mult: f64,
 }
 
 impl Default for ScreenerConfig {
@@ -24,6 +27,8 @@ impl Default for ScreenerConfig {
             min_price: 2.0,
             max_price: 500.0,
             top_n: 20,
+            stop_pct: 5.0,
+            reward_mult: 2.0,
         }
     }
 }
@@ -84,6 +89,14 @@ impl Screener {
                 0,
             );
 
+            let is_long = ticker.gap_pct() >= 0.0;
+            let levels = trade_levels(
+                ticker.premarket_price,
+                is_long,
+                config.stop_pct,
+                config.reward_mult,
+            );
+
             setups.push(Setup {
                 ticker,
                 catalyst,
@@ -91,6 +104,8 @@ impl Screener {
                 unusual_options_calls: None,
                 unusual_options_puts: None,
                 score,
+                levels,
+                next_earnings: None,
             });
         }
 
@@ -100,6 +115,13 @@ impl Screener {
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
         setups.truncate(config.top_n);
+
+        // Fetch the next earnings date once per scored setup (≤ top_n), not per
+        // watchlist symbol, to bound the extra scan time. Done after truncation
+        // so only the surviving top-N incur the extra rate-limited call.
+        for setup in setups.iter_mut() {
+            setup.next_earnings = self.finnhub.get_next_earnings(&setup.ticker.symbol).await;
+        }
 
         info!("Returning {} scored setups", setups.len());
         Ok(setups)

@@ -1,5 +1,35 @@
-#![allow(dead_code)]
+use crate::models::TradeLevels;
 
+/// Compute a direction-aware trade plan from an entry reference price.
+///
+/// `entry` is the reference price (the pre-market price). For a LONG the stop
+/// sits `stop_pct` below the entry and the target `stop_pct * reward_mult`
+/// above it; for a SHORT the placement is mirrored. The risk/reward ratio is
+/// the entry-to-target distance over the entry-to-stop distance, which equals
+/// `reward_mult` by construction. Guards against a non-positive entry or stop
+/// distance by returning a neutral plan (all levels equal the entry, R:R 0).
+pub fn trade_levels(entry: f64, is_long: bool, stop_pct: f64, reward_mult: f64) -> TradeLevels {
+    if entry <= 0.0 || stop_pct <= 0.0 {
+        return TradeLevels { entry, stop: entry, target: entry, risk_reward: 0.0 };
+    }
+
+    let stop_frac = stop_pct / 100.0;
+    let target_frac = stop_frac * reward_mult;
+
+    let (stop, target) = if is_long {
+        (entry * (1.0 - stop_frac), entry * (1.0 + target_frac))
+    } else {
+        (entry * (1.0 + stop_frac), entry * (1.0 - target_frac))
+    };
+
+    let risk = (entry - stop).abs();
+    let reward = (target - entry).abs();
+    let risk_reward = if risk > 0.0 { reward / risk } else { 0.0 };
+
+    TradeLevels { entry, stop, target, risk_reward }
+}
+
+#[allow(dead_code)]
 pub fn vwap(prices: &[f64], volumes: &[f64]) -> f64 {
     if prices.is_empty() || prices.len() != volumes.len() {
         return 0.0;
@@ -9,16 +39,19 @@ pub fn vwap(prices: &[f64], volumes: &[f64]) -> f64 {
     if denominator == 0.0 { 0.0 } else { numerator / denominator }
 }
 
+#[allow(dead_code)]
 pub fn relative_volume(current_vol: u64, avg_vol: u64) -> f64 {
     if avg_vol == 0 { return 0.0; }
     current_vol as f64 / avg_vol as f64
 }
 
+#[allow(dead_code)]
 pub fn gap_pct(current: f64, prev_close: f64) -> f64 {
     if prev_close == 0.0 { return 0.0; }
     ((current - prev_close) / prev_close) * 100.0
 }
 
+#[allow(dead_code)]
 pub fn atr(highs: &[f64], lows: &[f64], closes: &[f64], period: usize) -> Vec<f64> {
     if highs.len() < 2 {
         return vec![];
@@ -44,6 +77,7 @@ pub fn atr(highs: &[f64], lows: &[f64], closes: &[f64], period: usize) -> Vec<f6
     atrs
 }
 
+#[allow(dead_code)]
 pub fn ema(values: &[f64], period: usize) -> Vec<f64> {
     if values.len() < period {
         return vec![];
@@ -182,5 +216,55 @@ mod tests {
         let result = ema(&[4.0, 6.0], 2);
         assert_eq!(result.len(), 1);
         assert!((result[0] - 5.0).abs() < EPS);
+    }
+
+    // ── trade_levels ──────────────────────────────────────────────────────────
+
+    #[test]
+    fn trade_levels_long_stop_below_target_above() {
+        // entry=100, stop 5% → 95, target 5%*2 → 110, R:R = 10/5 = 2.0
+        let levels = trade_levels(100.0, true, 5.0, 2.0);
+        assert!((levels.entry - 100.0).abs() < EPS);
+        assert!((levels.stop - 95.0).abs() < EPS);
+        assert!((levels.target - 110.0).abs() < EPS);
+        assert!(levels.stop < levels.entry);
+        assert!(levels.target > levels.entry);
+        assert!((levels.risk_reward - 2.0).abs() < EPS);
+    }
+
+    #[test]
+    fn trade_levels_short_stop_above_target_below() {
+        // entry=100, stop 5% → 105, target 5%*2 → 90, R:R = 10/5 = 2.0
+        let levels = trade_levels(100.0, false, 5.0, 2.0);
+        assert!((levels.stop - 105.0).abs() < EPS);
+        assert!((levels.target - 90.0).abs() < EPS);
+        assert!(levels.stop > levels.entry);
+        assert!(levels.target < levels.entry);
+        assert!((levels.risk_reward - 2.0).abs() < EPS);
+    }
+
+    #[test]
+    fn trade_levels_risk_reward_equals_reward_mult() {
+        // R:R must equal the reward multiple within rounding, regardless of knobs
+        let levels = trade_levels(42.0, true, 10.0, 3.0);
+        assert!((levels.risk_reward - 3.0).abs() < EPS);
+    }
+
+    #[test]
+    fn trade_levels_wider_stop_pushes_target_further() {
+        let tight = trade_levels(100.0, true, 5.0, 2.0);
+        let wide = trade_levels(100.0, true, 10.0, 3.0);
+        assert!(wide.stop < tight.stop); // wider stop is further below entry
+        assert!(wide.target > tight.target); // and target is proportionally further
+    }
+
+    #[test]
+    fn trade_levels_zero_price_returns_neutral() {
+        // Boundary: a zero/near-zero entry yields a neutral plan, no division blow-up
+        let levels = trade_levels(0.0, true, 5.0, 2.0);
+        assert_eq!(levels.entry, 0.0);
+        assert_eq!(levels.stop, 0.0);
+        assert_eq!(levels.target, 0.0);
+        assert_eq!(levels.risk_reward, 0.0);
     }
 }

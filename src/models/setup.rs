@@ -1,5 +1,20 @@
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use crate::models::Ticker;
+
+/// Default near-term window (in calendar days) within which an upcoming
+/// earnings date is treated as event risk worth flagging.
+pub const EARNINGS_IMMINENT_WINDOW_DAYS: i64 = 5;
+
+/// Pure predicate: is `earnings` on or after `today` and within `window_days`?
+/// Past-dated earnings never count. Kept free-standing so it is unit-testable
+/// without reaching for the wall clock.
+pub fn earnings_is_imminent(earnings: NaiveDate, today: NaiveDate, window_days: i64) -> bool {
+    if earnings < today {
+        return false;
+    }
+    (earnings - today).num_days() <= window_days
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum CatalystType {
@@ -57,6 +72,16 @@ impl SetupScore {
     }
 }
 
+/// A direction-aware trade plan derived from the entry reference price and the
+/// configurable stop / reward knobs. All levels are absolute prices.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TradeLevels {
+    pub entry: f64,
+    pub stop: f64,
+    pub target: f64,
+    pub risk_reward: f64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Setup {
     pub ticker: Ticker,
@@ -65,11 +90,21 @@ pub struct Setup {
     pub unusual_options_calls: Option<f64>,
     pub unusual_options_puts: Option<f64>,
     pub score: SetupScore,
+    pub levels: TradeLevels,
+    pub next_earnings: Option<NaiveDate>,
 }
 
 impl Setup {
     pub fn direction(&self) -> &'static str {
         if self.ticker.gap_pct() >= 0.0 { "LONG" } else { "SHORT" }
+    }
+
+    /// True when the next earnings date is known and falls within `window_days`
+    /// of today (and is not in the past).
+    pub fn earnings_imminent(&self, window_days: i64) -> bool {
+        self.next_earnings
+            .map(|d| earnings_is_imminent(d, chrono::Utc::now().date_naive(), window_days))
+            .unwrap_or(false)
     }
 }
 
@@ -99,7 +134,13 @@ mod tests {
             unusual_options_calls: None,
             unusual_options_puts: None,
             score: make_score(0.0),
+            levels: TradeLevels { entry: premarket, stop: premarket, target: premarket, risk_reward: 0.0 },
+            next_earnings: None,
         }
+    }
+
+    fn date(y: i32, m: u32, d: u32) -> NaiveDate {
+        NaiveDate::from_ymd_opt(y, m, d).unwrap()
     }
 
     // ── grade ────────────────────────────────────────────────────────────────
@@ -172,5 +213,46 @@ mod tests {
     #[test]
     fn catalyst_display_unknown_label() {
         assert_eq!(format!("{}", CatalystType::Unknown), "No Catalyst");
+    }
+
+    // ── earnings imminence ───────────────────────────────────────────────────
+
+    #[test]
+    fn earnings_within_window_is_imminent() {
+        let today = date(2026, 6, 22);
+        // 3 days out, window 5 → imminent
+        assert!(earnings_is_imminent(date(2026, 6, 25), today, 5));
+    }
+
+    #[test]
+    fn earnings_on_window_boundary_is_imminent() {
+        let today = date(2026, 6, 22);
+        // exactly 5 days out, window 5 → imminent
+        assert!(earnings_is_imminent(date(2026, 6, 27), today, 5));
+    }
+
+    #[test]
+    fn earnings_today_is_imminent() {
+        let today = date(2026, 6, 22);
+        assert!(earnings_is_imminent(today, today, 5));
+    }
+
+    #[test]
+    fn earnings_beyond_window_is_not_imminent() {
+        let today = date(2026, 6, 22);
+        // 6 days out, window 5 → not imminent
+        assert!(!earnings_is_imminent(date(2026, 6, 28), today, 5));
+    }
+
+    #[test]
+    fn past_earnings_is_not_imminent() {
+        let today = date(2026, 6, 22);
+        assert!(!earnings_is_imminent(date(2026, 6, 20), today, 5));
+    }
+
+    #[test]
+    fn earnings_imminent_none_is_false() {
+        // a setup with no known earnings date is never imminent
+        assert!(!make_setup(110.0, 100.0).earnings_imminent(5));
     }
 }

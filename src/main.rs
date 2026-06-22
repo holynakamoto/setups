@@ -9,7 +9,7 @@ use tracing::info;
 
 use data::FinnhubClient;
 use analysis::{Screener, screener::ScreenerConfig};
-use models::Setup;
+use models::{Setup, earnings_is_imminent, EARNINGS_IMMINENT_WINDOW_DAYS};
 use ui::Dashboard;
 
 #[derive(Parser)]
@@ -37,6 +37,14 @@ struct Cli {
     /// Number of top setups to display (default: 20)
     #[arg(long, default_value = "20")]
     top: usize,
+
+    /// Stop-loss distance from entry, in percent (default: 5.0)
+    #[arg(long, default_value = "5.0")]
+    stop_pct: f64,
+
+    /// Profit-target distance as a multiple of the stop distance (default: 2.0)
+    #[arg(long, default_value = "2.0")]
+    reward_mult: f64,
 
     /// Print as plain text table instead of opening the TUI dashboard
     #[arg(long)]
@@ -73,6 +81,8 @@ async fn main() -> Result<()> {
         min_price: cli.min_price,
         max_price: cli.max_price,
         top_n: cli.top,
+        stop_pct: cli.stop_pct,
+        reward_mult: cli.reward_mult,
     };
 
     match cli.command.unwrap_or(Command::Scan) {
@@ -104,6 +114,34 @@ async fn main() -> Result<()> {
             println!("Prev close:      ${:.2}", ticker.prev_close);
             println!("Gap:             {:+.2}%", ticker.gap_pct());
             println!("Relative volume: {:.2}x", ticker.relative_volume());
+
+            let is_long = ticker.gap_pct() >= 0.0;
+            let levels = analysis::indicators::trade_levels(
+                ticker.premarket_price,
+                is_long,
+                config.stop_pct,
+                config.reward_mult,
+            );
+            println!("Direction:       {}", if is_long { "LONG" } else { "SHORT" });
+            println!("Entry:           ${:.2}", levels.entry);
+            println!("Stop:            ${:.2}", levels.stop);
+            println!("Target:          ${:.2}", levels.target);
+            println!("Risk/Reward:     {:.2}", levels.risk_reward);
+
+            let next_earnings = client.get_next_earnings(&symbol).await;
+            let earnings_str = match next_earnings {
+                Some(d) => {
+                    let today = chrono::Utc::now().date_naive();
+                    if earnings_is_imminent(d, today, EARNINGS_IMMINENT_WINDOW_DAYS) {
+                        format!("{} (imminent)", d)
+                    } else {
+                        d.to_string()
+                    }
+                }
+                None => "—".to_string(),
+            };
+            println!("Earnings:        {}", earnings_str);
+
             println!("Catalyst:        {}", catalyst);
             println!("News:            {}", headline);
         }
@@ -159,33 +197,48 @@ fn is_interactive_tty() -> bool {
 
 fn print_table(setups: &[Setup]) {
     println!(
-        "\n{:<8} {:>8} {:>8} {:>6} {:>9} {:>6}  {:<18}  {:>5}  {}",
-        "SYMBOL", "PRICE", "GAP%", "RVOL", "SHORT%", "SCORE", "CATALYST", "GRADE", "NEWS"
+        "\n{:<8} {:>8} {:>8} {:>6} {:>9} {:>8} {:>8} {:>8} {:>5} {:>6}  {:<18}  {:>5}  {:<16}  {}",
+        "SYMBOL", "PRICE", "GAP%", "RVOL", "SHORT%", "ENTRY", "STOP", "TARGET", "R:R", "SCORE", "CATALYST", "GRADE", "EARNINGS", "NEWS"
     );
-    println!("{}", "-".repeat(110));
+    println!("{}", "-".repeat(168));
     for s in setups {
         let short = s
             .ticker
             .short_float_pct
             .map(|p| format!("{:.1}%", p))
             .unwrap_or_else(|| "N/A".into());
+        let earnings = match s.next_earnings {
+            Some(d) => {
+                if s.earnings_imminent(EARNINGS_IMMINENT_WINDOW_DAYS) {
+                    format!("{} SOON", d)
+                } else {
+                    d.to_string()
+                }
+            }
+            None => "—".to_string(),
+        };
         let news = s
             .catalyst_headline
             .as_deref()
             .unwrap_or("—")
             .chars()
-            .take(50)
+            .take(40)
             .collect::<String>();
         println!(
-            "{:<8} {:>8.2} {:>+7.1}% {:>5.1}x {:>9}  {:>5.0}  {:<18}  {:>5}  {}",
+            "{:<8} {:>8.2} {:>+7.1}% {:>5.1}x {:>9} {:>8.2} {:>8.2} {:>8.2} {:>5.2} {:>6.0}  {:<18}  {:>5}  {:<16}  {}",
             s.ticker.symbol,
             s.ticker.premarket_price,
             s.ticker.gap_pct(),
             s.ticker.relative_volume(),
             short,
+            s.levels.entry,
+            s.levels.stop,
+            s.levels.target,
+            s.levels.risk_reward,
             s.score.total,
             format!("{}", s.catalyst).chars().take(18).collect::<String>(),
             s.score.grade(),
+            earnings,
             news,
         );
     }

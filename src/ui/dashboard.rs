@@ -13,7 +13,7 @@ use ratatui::{
     Frame, Terminal,
 };
 use std::io;
-use crate::models::Setup;
+use crate::models::{Setup, EARNINGS_IMMINENT_WINDOW_DAYS};
 
 pub struct Dashboard {
     setups: Vec<Setup>,
@@ -215,6 +215,42 @@ impl Dashboard {
                         calls, puts, setup.ticker.prev_close
                     )),
                 ]),
+                Line::from(vec![
+                    Span::styled(
+                        "  Trade Plan — ",
+                        Style::default().add_modifier(Modifier::BOLD),
+                    ),
+                    Span::raw(format!(
+                        "Entry: ${:.2}  ",
+                        setup.levels.entry
+                    )),
+                    Span::styled(
+                        format!("Stop: ${:.2}  ", setup.levels.stop),
+                        Style::default().fg(Color::Red),
+                    ),
+                    Span::styled(
+                        format!("Target: ${:.2}  ", setup.levels.target),
+                        Style::default().fg(Color::Green),
+                    ),
+                    Span::raw(format!("R:R: {:.2}", setup.levels.risk_reward)),
+                ]),
+                {
+                    let mut spans = vec![Span::raw("  Earnings: ")];
+                    match setup.next_earnings {
+                        Some(d) => {
+                            if setup.earnings_imminent(EARNINGS_IMMINENT_WINDOW_DAYS) {
+                                spans.push(Span::styled(
+                                    format!("{} (imminent)", d),
+                                    Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD),
+                                ));
+                            } else {
+                                spans.push(Span::raw(d.to_string()));
+                            }
+                        }
+                        None => spans.push(Span::raw("—")),
+                    }
+                    Line::from(spans)
+                },
             ]
         } else {
             vec![Line::from("  Select a setup to view details")]

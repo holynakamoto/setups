@@ -3,7 +3,7 @@ defract:
   id: task-would-like-to-add-entry-and-exit-01kvqsdz9c20
   type: task
   status: active
-  stage: review
+  stage: release
   phase: 0
   total_phases: 2
   priority: normal
@@ -226,4 +226,71 @@ No security issues found in changed files.
 ## Required Changes
 
 None.
+
+## Release
+
+## Release Notes
+
+### What was built
+
+- Phase 1: Direction-aware entry/stop/target levels with configurable risk knobs (--stop-pct, --reward-mult). Every setup now carries a concrete trade plan derived from existing quote data (premarket_price, prev_close).
+- Phase 2: Earnings calendar integration flagging imminent earnings (within 5 days by default). Every scored setup carries its next upcoming earnings date, fetched once per setup after truncation to the top_n results.
+- All new fields render across three output surfaces: the ratatui TUI detail panel, the plain-text table, and the single-symbol lookup (cargo run -- symbol TICKER).
+
+### Key decisions
+
+- Entry/exit levels use a configurable percentage-and-gap model (--stop-pct, --reward-mult defaults: 5.0, 2.0) rather than ATR-based volatility stops, since intraday OHLC candles are not fetched and are restricted on Finnhub's free tier. Allows traders to tune aggressiveness to their risk appetite.
+- Earnings fetch runs once per scored setup after sorting and truncating to top_n, not during candidate enrichment, to bound the extra API calls to <= top_n (requirement R12).
+- Imminence threshold lives in a shared EARNINGS_IMMINENT_WINDOW_DAYS constant (default 5 days), not a CLI flag, since the requirements specified a fixed default and no flag was requested.
+- trade_levels() is a pure, unit-testable function in src/analysis/indicators.rs; Setup carries an owned TradeLevels field (not Option) since every scanned setup always gets levels computed.
+- next_earnings stored as Option<chrono::NaiveDate> on Setup for type-safe date comparison and serialization consistency with the existing model convention.
+
+### Changes by phase
+
+- **Phase 1: Actionable entry and exit levels** — Added trade_levels(entry, is_long, stop_pct, reward_mult) -> TradeLevels pure function with 5 unit tests (LONG, SHORT, R:R-equals-reward-mult, wider-knobs, zero-price boundary). Extended ScreenerConfig with stop_pct and reward_mult knobs threaded from --stop-pct and --reward-mult CLI flags. Every setup computed during scan() carries entry, stop, target, and risk/reward. Rendered in TUI detail panel (with color cues: red stop, green target), plain table (ENTRY, STOP, TARGET, R:R columns), and symbol subcommand output.
+- **Phase 2: Earnings awareness** — Added get_next_earnings(symbol) -> Option<NaiveDate> method to FinnhubClient hitting /calendar/earnings over a 90-day horizon, reusing the shared get<T>() helper and 1.1s rate-limit sleep. Added earnings_is_imminent(earnings, today, window_days) pure predicate with 6 unit tests covering within-window, on-boundary, today, beyond-window, past-date, and None cases. Every scored setup carries an optional next_earnings date and an earnings_imminent(window_days) method. Rendered in TUI detail panel (bold-yellow with imminent marker), plain table (EARNINGS column with SOON suffix when imminent), and symbol subcommand (Earnings: line with imminent marker or —).
+
+### Verification
+
+- Production build: PASS (cargo build --release completed successfully)
+- Automated checks: PASS
+  - cargo test: 99 passed (88 baseline + 5 trade_levels tests + 6 earnings_is_imminent tests), 0 failed
+  - cargo build: Finished dev profile with no warnings in touched modules
+- Acceptance criteria: 9/9 passed
+  - Entry/stop/target rendered with correct directional placement (LONG: stop < entry < target; SHORT: target < entry < stop)
+  - Risk/reward ratio equals reward multiple within rounding (verified by unit test)
+  - CLI flags --stop-pct and --reward-mult parse and produce proportionally wider stops and targets
+  - TUI detail panel and symbol subcommand both display the four new fields
+  - Earnings dates render correctly; missing dates and failed API calls degrade gracefully to —
+  - Build clean with no warnings
+
+### Implementation details
+
+**Files changed:**
+- src/analysis/indicators.rs — pure trade_levels() function with 5 unit tests; per-function #[allow(dead_code)] on unused functions
+- src/models/setup.rs — TradeLevels struct, next_earnings field, earnings_imminent() method, earnings_is_imminent() predicate, 6 unit tests
+- src/models/mod.rs — re-exports TradeLevels, earnings_is_imminent, EARNINGS_IMMINENT_WINDOW_DAYS
+- src/analysis/screener.rs — ScreenerConfig extended with stop_pct/reward_mult; compute levels during scan(); fetch earnings once per scored setup after top_n truncation
+- src/main.rs — --stop-pct and --reward-mult CLI flags; ENTRY/STOP/TARGET/R:R/EARNINGS columns in print_table; Earnings line in Symbol subcommand
+- src/ui/dashboard.rs — Trade Plan and Earnings lines in render_detail with color cues and imminent markers
+- src/data/finnhub.rs — get_next_earnings() method, EarningsCalendarResp and EarningsEntry deserialization structs
+
+**Code metrics:**
+- 99 tests pass (11 new unit tests added)
+- 0 compiler warnings in touched modules
+- All changes additive; no refactoring or removal of existing functionality
+
+### Risk assessment
+
+- Entry/exit heuristic model is non-advice and level placement (especially on large gaps) must be sensible so traders trust the numbers. All levels computed from existing data with configurable knobs and thoroughly unit-tested.
+- Earnings endpoint failure is gracefully handled and never aborts the scan, consistent with existing error-handling patterns in the codebase.
+- Extra API calls bounded to top_n results, not once-per-candidate, so scan time overhead is minimal (at most ~30 extra calls on a default scan).
+
+## Verification
+
+- [x] Production build passes
+- [x] All 9 acceptance criteria passed
+- [x] 99 tests pass, 0 failed
+- [x] Code pushed to origin/feature/task-would-like-to-add-entry-and-exit-01kvqsdz9c20
+- [x] No new compiler warnings
 

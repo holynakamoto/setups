@@ -68,6 +68,18 @@ struct NewsItem {
     headline: String,
 }
 
+#[derive(Debug, Default, Deserialize)]
+struct EarningsCalendarResp {
+    #[serde(rename = "earningsCalendar", default)]
+    earnings_calendar: Vec<EarningsEntry>,
+}
+
+#[derive(Debug, Deserialize)]
+struct EarningsEntry {
+    /// Earnings date in "YYYY-MM-DD" form.
+    date: String,
+}
+
 pub struct FinnhubClient {
     client: Client,
     api_key: String,
@@ -203,6 +215,32 @@ impl FinnhubClient {
             let catalyst = classify_headline(&item.headline);
             (item.headline, catalyst)
         }))
+    }
+
+    /// Next upcoming earnings date for a symbol, or `None` when unknown.
+    /// Queries the earnings calendar for the next 90 days and returns the
+    /// earliest non-past date. Degrades gracefully like `get_top_catalyst`:
+    /// a failed or empty response yields `None` and never aborts the scan.
+    pub async fn get_next_earnings(&self, symbol: &str) -> Option<chrono::NaiveDate> {
+        use chrono::Utc;
+        tokio::time::sleep(Duration::from_millis(1100)).await;
+        let today = Utc::now().date_naive();
+        let horizon = today + chrono::Duration::days(90);
+        let resp: EarningsCalendarResp = self
+            .get(&format!(
+                "/calendar/earnings?from={}&to={}&symbol={}",
+                today.format("%Y-%m-%d"),
+                horizon.format("%Y-%m-%d"),
+                symbol
+            ))
+            .await
+            .unwrap_or_default();
+
+        resp.earnings_calendar
+            .iter()
+            .filter_map(|e| chrono::NaiveDate::parse_from_str(&e.date, "%Y-%m-%d").ok())
+            .filter(|d| *d >= today)
+            .min()
     }
 }
 
