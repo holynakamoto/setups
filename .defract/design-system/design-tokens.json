@@ -1,8 +1,65 @@
 {
-  "colors": {},
-  "typography": {},
+  "meta": {
+    "generator": "defract-design-system-extractor",
+    "source": "src/ui/dashboard.rs — ratatui Style/Color/Modifier usage. Values are ANSI terminal color approximations; exact rendering depends on the terminal emulator theme.",
+    "extractedAt": "2026-06-22T00:00:00Z"
+  },
+  "colors": {
+    "cyan": {
+      "value": "#06989A",
+      "type": "color",
+      "ansiToken": "Color::Cyan",
+      "usage": "accent, ticker symbols, app title"
+    },
+    "green": {
+      "value": "#4E9A06",
+      "type": "color",
+      "ansiToken": "Color::Green",
+      "usage": "positive gap, B-grade score"
+    },
+    "lightGreen": {
+      "value": "#8AE234",
+      "type": "color",
+      "ansiToken": "Color::LightGreen",
+      "usage": "A-grade score (90–100)"
+    },
+    "yellow": {
+      "value": "#C4A000",
+      "type": "color",
+      "ansiToken": "Color::Yellow",
+      "usage": "warning, high RVOL, C-grade score, keybindings"
+    },
+    "red": {
+      "value": "#CC0000",
+      "type": "color",
+      "ansiToken": "Color::Red",
+      "usage": "negative gap, low score"
+    },
+    "white": {
+      "value": "#D3D7CF",
+      "type": "color",
+      "ansiToken": "Color::White",
+      "usage": "table header row text"
+    },
+    "darkGray": {
+      "value": "#555753",
+      "type": "color",
+      "ansiToken": "Color::DarkGray",
+      "usage": "selected row highlight background"
+    }
+  },
+  "typography": {
+    "fontFamilies": {},
+    "fontSizes": {},
+    "fontWeights": {},
+    "lineHeights": {},
+    "letterSpacing": {}
+  },
   "spacing": {},
   "breakpoints": {},
   "shadows": {},
-  "borders": {}
+  "borders": {
+    "radii": {}
+  },
+  "zIndex": {}
 }
