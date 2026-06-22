@@ -1,7 +1,8 @@
 # Past Decisions
 
-Last updated: (auto)
+## Decisions
 
-## Architecture
+- [01KVRB2YCVNG52PVS7E8E9SSSV] **- **Automate Homebrew formula SHA256 update inside the release workflow** —...** -- - **Automate Homebrew formula SHA256 update inside the release workflow** — Read checksums from build artifacts and apply BSD `sed -i ''` substitution in the publish job rather than requiring a manual post-release step. Eliminates the window where the formula is broken between a release publish and a human running the update. Requires `permissions: contents: write` on the workflow and a direct commit to master. [source: task-debugging-brew-install-setups-failure-01kvqz1rzz42, importance: 0.7]. [source: task-debugging-brew-install-setups-failure-01kvqz1rzz42, importance: 0.7]
+- [01KVRB2TPA4FC3C6BMMGZAZE5A] **- **Native macOS runners per architecture over cross-compilation for Rust CI*...** -- - **Native macOS runners per architecture over cross-compilation for Rust CI** — Use `macos-14` (Apple Silicon / aarch64-apple-darwin) and `macos-13` (Intel / x86_64-apple-darwin) as separate matrix jobs rather than cross-compiling. Avoids linker configuration, the `cross` crate, and SDK path issues that frequently break in CI. Trade-off: two runner-minute slots per release instead of one. [source: task-debugging-brew-install-setups-failure-01kvqz1rzz42, importance: 0.7]. [source: task-debugging-brew-install-setups-failure-01kvqz1rzz42, importance: 0.7]
+- [01KVRB357P748YEXEAMSYA6HQM] **- **Homebrew formula stays in the main `setups` repo, not a separate tap repo...** -- - **Homebrew formula stays in the main `setups` repo, not a separate tap repo** — Formula file already existed in the main repo; creating `homebrew-setups` was out of scope. Trade-off: the short-form `brew tap holynakamoto/setups` (which maps to `homebrew-setups` by convention) does not work — users must use the full-URL tap form: `brew tap holynakamoto/setups https://github.com/holynakamoto/setups`. Creating a separate `homebrew-setups` repo is a natural follow-up to enable the short-form. [source: task-debugging-brew-install-setups-failure-01kvqz1rzz42, importance: 0.6]. [source: task-debugging-brew-install-setups-failure-01kvqz1rzz42, importance: 0.6]
 
-## CI/CD

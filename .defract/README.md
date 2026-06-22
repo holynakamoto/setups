@@ -6,7 +6,7 @@ This project uses [defract](https://defract.dev) for structured AI-assisted deve
 
 | Task | Stage | Status |
 |------|-------|--------|
-| Debugging brew install setups failure | scope | active |
+| Enable brew install via release CI and Homebrew tap | release | completed |
 | Enhance setups tool with advanced trader analysis features | release | completed |
 | TUI Redesign, Hyperlinks, and Homebrew Packaging | release | completed |
 
