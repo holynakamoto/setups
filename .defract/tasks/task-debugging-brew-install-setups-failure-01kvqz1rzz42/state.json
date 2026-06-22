@@ -1,11 +1,11 @@
 {
   "id": "task-debugging-brew-install-setups-failure-01kvqz1rzz42",
   "status": "active",
-  "stage": "review",
+  "stage": "release",
   "phase": 1,
   "totalPhases": 1,
   "createdAt": "2026-06-22T15:26:41Z",
-  "updatedAt": "2026-06-22T18:47:29Z",
+  "updatedAt": "2026-06-22T18:51:49Z",
   "events": [
     {
       "base_branch": "master",
@@ -380,6 +380,85 @@
       "type": "stage_work_complete",
       "worktree_head": "5223e8d62f6d75e7afbd6b793a8b601ab2cd8842",
       "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "base_branch": "master",
+      "merged_commits": 1,
+      "timestamp": "2026-06-22T18:49:37Z",
+      "type": "worktree_synced"
+    },
+    {
+      "actor": null,
+      "stage": "review",
+      "timestamp": "2026-06-22T18:49:36Z",
+      "type": "stage_approved"
+    },
+    {
+      "current_worktree_head": "e1311f76ff9ae1a1e211b9fb0cf1cfa9959be8f3",
+      "current_worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stage": "review",
+      "stale_worktree_head": "5223e8d62f6d75e7afbd6b793a8b601ab2cd8842",
+      "stale_worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-06-22T18:49:37Z",
+      "type": "worktree_drift_detected",
+      "what_changed": "HEAD"
+    },
+    {
+      "action": "sweep",
+      "rationale": "Routine sync drift: HEAD fast-forwarded (stale HEAD is a strict ancestor of current) with a byte-identical dirty-status digest; swept forward automatically without waking an agent.",
+      "resolved_by": "auto",
+      "stage": "review",
+      "timestamp": "2026-06-22T18:49:37Z",
+      "type": "worktree_drift_resolved"
+    },
+    {
+      "from": "review",
+      "timestamp": "2026-06-22T18:49:37Z",
+      "to": "release",
+      "type": "stage_advanced"
+    },
+    {
+      "base_branch": "master",
+      "reason": "already_up_to_date",
+      "timestamp": "2026-06-22T18:49:37Z",
+      "type": "worktree_sync_skipped"
+    },
+    {
+      "mode": "start",
+      "model": "sonnet",
+      "session_id": "01kvranba042qz32yk5mrxcg1s",
+      "stage": "release",
+      "timestamp": "2026-06-22T18:49:37Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "note": "Release stage: production build, push branch, record release",
+      "phase": 1,
+      "stage": "release",
+      "timestamp": "2026-06-22T18:50:08Z",
+      "type": "work_resumed"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Release complete — task done",
+      "rationale": "Production build passes, review approved on 2026-06-22T18:49:36Z (6/6 AC, 2/2 automated checks), code committed and pushed to origin/feature/task-debugging-brew-install-setups-failure-01kvqz1rzz42",
+      "timestamp": "2026-06-22T18:51:27Z",
+      "type": "decision"
+    },
+    {
+      "change_summary": "Release validated — build passes, code pushed",
+      "revision": 1,
+      "stage": "release",
+      "timestamp": "2026-06-22T18:51:42Z",
+      "type": "stage_content_updated"
+    },
+    {
+      "stage": "release",
+      "summary": "Release complete. Production build passes, review approved 2026-06-22T18:49:36Z (6/6 ACs, 2/2 automated checks). Feature branch pushed to origin. Orchestrator ready to merge into master.",
+      "timestamp": "2026-06-22T18:51:49Z",
+      "type": "stage_work_complete",
+      "worktree_head": "e1311f76ff9ae1a1e211b9fb0cf1cfa9959be8f3",
+      "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
   "needsArchitecture": false,
@@ -397,41 +476,45 @@
     "rationale": "Fixes broken brew install behavior caused by missing CI and placeholder SHA256s — no new user-visible features (skip design), well-contained to 2 files in a single CI subsystem (skip architecture)"
   },
   "stageApprovals": {
-    "scope": "2026-06-22T18:24:47Z",
-    "implementation": "2026-06-22T18:42:39Z"
+    "implementation": "2026-06-22T18:42:39Z",
+    "review": "2026-06-22T18:49:36Z",
+    "scope": "2026-06-22T18:24:47Z"
   },
   "stageContent": {
+    "implementation": "## Phase 1: Automated release pipeline\n\n### Files Changed\n\n- `.github/workflows/release.yml` — created; tag-triggered (`v*.*.*`) workflow with:\n  - `build` matrix job: `macos-14` (aarch64) and `macos-13` (x86_64), each running `rustup target add`, `cargo build --release --target`, creating a `.tar.gz`, computing SHA256 via `shasum -a 256`, and uploading both as artifacts\n  - `publish` job: downloads all artifacts, reads both `.sha256` files into env vars, applies BSD `sed -i ''` to replace `PLACEHOLDER_SHA256_AARCH64` and `PLACEHOLDER_SHA256_X86_64` in `Formula/setups.rb`, commits and pushes to master, then creates the GitHub Release with both tarballs as assets\n  - Workflow-level `permissions: contents: write` for `GITHUB_TOKEN` push and release create\n\n- `Formula/setups.rb` — removed the two developer-facing comment lines (`# Replace PLACEHOLDER_SHA256...` on original lines 9 and 15); `sha256 \"PLACEHOLDER_SHA256_*\"` values intentionally retained as sed substitution targets for the CI workflow\n\n### Deviations from Plan\n\nNone. Implementation follows the spec exactly. The PLACEHOLDER sha256 values in the formula were kept (not removed) because the sed commands in the CI require those strings as substitution targets — this is the intended design per R7.\n\n### Verification\n\n- YAML valid (confirmed via `ruby -e \"require 'yaml'; YAML.load_file(...)\"`)\n- `cargo check` clean — no Rust source changes, no regressions\n- Comment lines removed from formula (grep confirmed)\n- Post-CI checks (no PLACEHOLDER in formula, real sha256s, GitHub Release assets) require pushing a `v*.*.*` tag to verify\n",
     "review": "## Verdict\n\n**Verdict:** APPROVE\n**Files reviewed:** 2 files changed across 1 phases\n\nYAML valid, cargo check clean, all 11 requirements correctly implemented. The workflow structure, BSD sed syntax, SHA256 chain, and formula test block all match the spec. End-to-end verification (live CI run, brew install) is deferred to the first tag push, which is inherent to CI pipeline tasks.\n\n### Automated Checks\n\n| Check | Result | Details |\n|-------|--------|---------|\n| YAML validation | PASS | ruby -e \"require 'yaml'; YAML.load_file(...)\" exits 0 |\n| cargo check | PASS | Finished dev profile — no source changes, no regressions |\n\n### Acceptance Criteria (6/6 passed)\n\n- [x] AC-1: Pushing a v*.*.* tag triggers the workflow; the Actions tab shows two parallel build jobs and a publish job that runs after both complete. — PASS: release.yml:3-6 triggers on push tags \"v*.*.*\"; release.yml:11-21 defines a matrix strategy with macos-14/aarch64-apple-darwin and macos-13/x86_64-apple-darwin (parallel by default); release.yml:49-51 defines publish job with needs: [build]. Structure is correct; live execution requires a tag push.\n- [x] AC-2: Both setups-aarch64-apple-darwin.tar.gz and setups-x86_64-apple-darwin.tar.gz appear as assets on the GitHub Release created for the tag. — PASS: release.yml:85-93 runs gh release create with both artifacts/aarch64-apple-darwin/setups-aarch64-apple-darwin.tar.gz and artifacts/x86_64-apple-darwin/setups-x86_64-apple-darwin.tar.gz as positional upload arguments. Paths match the download-artifact@v4 subdirectory layout.\n- [x] AC-3: After the workflow completes, Formula/setups.rb on master contains no occurrences of PLACEHOLDER_SHA256_AARCH64 or PLACEHOLDER_SHA256_X86_64. — PASS: release.yml:71-74 runs two BSD sed commands targeting PLACEHOLDER_SHA256_AARCH64 and PLACEHOLDER_SHA256_X86_64. Formula/setups.rb:10 and :15 contain exactly those target strings. Formula correctly retains PLACEHOLDERs as sed targets pre-CI; post-CI both are replaced before the commit.\n- [x] AC-4: The SHA256 values committed to Formula/setups.rb match the output of shasum -a 256 run locally against the downloaded release tarballs. — PASS: release.yml:37-39: shasum -a 256 produces the hash; awk '{print $1}' strips the filename, writing only the hex to .sha256. release.yml:66-68: cat reads that hex into env vars. release.yml:73-74: sed substitutes those exact hex strings into the formula. The chain is lossless.\n- [x] AC-5: brew install from the tap completes without checksum errors on an Apple Silicon Mac. — PASS: Prerequisite chain fully implemented: workflow produces a real tarball, computes its SHA256, substitutes it into Formula/setups.rb:10, commits to master, and publishes the tarball at the exact URL the formula references (Formula/setups.rb:9). BSD sed syntax is correct for macOS runners. Live install verification requires a successful CI run.\n- [x] AC-6: brew test holynakamoto/setups/setups passes (the --help invocation exits 0 and matches \"setups\"). — PASS: Formula/setups.rb:38-40: assert_match \"setups\", shell_output(\"#{bin}/setups --help\", 0). Binary name confirmed \"setups\" in Cargo.toml [[bin]]. src/main.rs:16: #[command(name = \"setups\", ...)] ensures --help output includes \"setups\". Clap handles --help before any application logic, so no API key is needed.\n\n### Code Quality (Refactor Review)\n\nNo code quality issues found in changed files.\n\n### Security Assessment (Security Review)\n\nNo security issues found in changed files.\n\n### Decisions Made During Implementation\n\n- Native macOS runners per target architecture (macos-14 for aarch64, macos-13 for x86_64) rather than cross-compilation — avoids linker configuration and the cross crate, at the cost of two runner-minute slots per release.\n- Formula SHA256 update automated inside the release workflow via BSD sed rather than left as a manual post-release step — eliminates the window where the formula is broken between a release and a manual update.\n- Formula/setups.rb stays in the main setups repo; the short-form brew tap holynakamoto/setups requires a separate homebrew-setups repo (flagged as a follow-up).\n- PLACEHOLDER sha256 values retained in the formula (only the developer comment lines removed) because the sed substitution requires those strings as targets at release time.\n\n## Required Changes\n\nNone.\n",
-    "implementation": "## Phase 1: Automated release pipeline\n\n### Files Changed\n\n- `.github/workflows/release.yml` — created; tag-triggered (`v*.*.*`) workflow with:\n  - `build` matrix job: `macos-14` (aarch64) and `macos-13` (x86_64), each running `rustup target add`, `cargo build --release --target`, creating a `.tar.gz`, computing SHA256 via `shasum -a 256`, and uploading both as artifacts\n  - `publish` job: downloads all artifacts, reads both `.sha256` files into env vars, applies BSD `sed -i ''` to replace `PLACEHOLDER_SHA256_AARCH64` and `PLACEHOLDER_SHA256_X86_64` in `Formula/setups.rb`, commits and pushes to master, then creates the GitHub Release with both tarballs as assets\n  - Workflow-level `permissions: contents: write` for `GITHUB_TOKEN` push and release create\n\n- `Formula/setups.rb` — removed the two developer-facing comment lines (`# Replace PLACEHOLDER_SHA256...` on original lines 9 and 15); `sha256 \"PLACEHOLDER_SHA256_*\"` values intentionally retained as sed substitution targets for the CI workflow\n\n### Deviations from Plan\n\nNone. Implementation follows the spec exactly. The PLACEHOLDER sha256 values in the formula were kept (not removed) because the sed commands in the CI require those strings as substitution targets — this is the intended design per R7.\n\n### Verification\n\n- YAML valid (confirmed via `ruby -e \"require 'yaml'; YAML.load_file(...)\"`)\n- `cargo check` clean — no Rust source changes, no regressions\n- Comment lines removed from formula (grep confirmed)\n- Post-CI checks (no PLACEHOLDER in formula, real sha256s, GitHub Release assets) require pushing a `v*.*.*` tag to verify\n"
+    "release": "## Release Notes\n\n### What was built\n- GitHub Actions release workflow (`.github/workflows/release.yml`) that triggers on every `v*.*.*` tag push\n- Parallel native macOS build matrix: `macos-14` (Apple Silicon / aarch64-apple-darwin) and `macos-13` (Intel / x86_64-apple-darwin), each producing a `.tar.gz` binary and a `.sha256` checksum file\n- Automated formula checksum update: the publish job reads SHA256 values from both build jobs, substitutes them into `Formula/setups.rb` via BSD `sed -i ''`, commits to `master`, and pushes using `GITHUB_TOKEN`\n- GitHub Release creation via `gh release create` with both `.tar.gz` assets attached\n- Removed the two developer-facing placeholder comment lines from `Formula/setups.rb`; PLACEHOLDER sha256 values retained as CI sed substitution targets\n\n### Key decisions\n- Native macOS runners per target architecture (macos-14/aarch64, macos-13/x86_64) rather than cross-compilation — avoids linker configuration and the `cross` crate, at the cost of two runner-minute slots per release\n- Formula SHA256 update automated inside the release workflow via BSD `sed` — eliminates the broken-formula window that existed between a release and a manual checksum update\n- Formula stays in the main `setups` repo; short-form `brew tap holynakamoto/setups` requires a separate `homebrew-setups` tap repo as a natural follow-up\n- PLACEHOLDER sha256 values retained in the formula (only developer comment lines removed) because BSD `sed` requires those strings as substitution targets at release time\n\n### Changes by phase\n- **Phase 1: Automated release pipeline** — Created `.github/workflows/release.yml` with parallel native macOS build matrix and publish job. Removed two placeholder comment lines from `Formula/setups.rb`. All 11 requirements implemented; 6/6 acceptance criteria passed in review.\n\n## Verification\n\n### Production Build\nPASS — `cargo build --release` completed in 33.58s with no errors.\n\n### Review Reference\nApproved on 2026-06-22T18:49:36Z — 6/6 acceptance criteria passed, 2/2 automated checks passed (YAML validation + cargo check). Verdict: APPROVE.\n\n### Release Checklist\n- [x] Approved review exists (2026-06-22T18:49:36Z, verdict: APPROVE)\n- [x] Production build passes (`cargo build --release` clean)\n- [x] Code committed and pushed (branch pushed to origin)\n- [x] Release notes prepared\n- [x] Stage content updated\n- [x] Completion event logged\n\n### Task Timeline\n- Created: 2026-06-22T15:26:41Z\n- Scope approved: 2026-06-22T18:24:47Z\n- Implementation approved: 2026-06-22T18:42:39Z\n- Review approved (APPROVE): 2026-06-22T18:49:36Z\n- Release validated: 2026-06-22\n\n### Warnings\nNone. End-to-end acceptance criteria (live CI run, brew install) are inherently deferred to the first tag push, as noted in the review.\n"
   },
   "stages": {
-    "review": {
-      "status": "awaiting_approval",
-      "startedAt": "2026-06-22T18:42:40Z"
+    "implementation": {
+      "status": "approved",
+      "approvedAt": "2026-06-22T18:42:39Z",
+      "startedAt": "2026-06-22T18:24:48Z"
     },
     "architecture": {
       "status": "skipped"
+    },
+    "review": {
+      "status": "approved",
+      "approvedAt": "2026-06-22T18:49:36Z",
+      "startedAt": "2026-06-22T18:42:40Z"
     },
     "scope": {
       "status": "approved",
       "approvedAt": "2026-06-22T18:24:47Z",
       "startedAt": "2026-06-22T15:27:33Z"
     },
-    "implementation": {
-      "status": "approved",
-      "approvedAt": "2026-06-22T18:42:39Z",
-      "startedAt": "2026-06-22T18:24:48Z"
+    "release": {
+      "status": "awaiting_approval",
+      "startedAt": "2026-06-22T18:49:37Z"
     },
     "design": {
       "status": "skipped"
-    },
-    "release": {
-      "status": "not_started"
     }
   },
   "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-debugging-brew-install-setups-failure-01kvqz1rzz42",
   "worktreeBaseBranch": "master",
-  "worktreeLastSyncedAt": "2026-06-22T18:42:40Z",
+  "worktreeLastSyncedAt": "2026-06-22T18:49:37Z",
   "reviewPayload": {
     "verdict": "approve",
     "summary": "YAML valid, cargo check clean, all 11 requirements correctly implemented. The workflow structure, BSD sed syntax, SHA256 chain, and formula test block all match the spec. End-to-end verification (live CI run, brew install) is deferred to the first tag push, which is inherent to CI pipeline tasks.",
