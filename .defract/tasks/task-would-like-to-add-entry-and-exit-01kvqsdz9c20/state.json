@@ -3,9 +3,9 @@
   "status": "active",
   "stage": "scope",
   "phase": 0,
-  "totalPhases": 1,
+  "totalPhases": 2,
   "createdAt": "2026-06-22T13:48:30Z",
-  "updatedAt": "2026-06-22T13:48:30Z",
+  "updatedAt": "2026-06-22T13:55:49Z",
   "events": [
     {
       "models": {
@@ -34,38 +34,128 @@
       "stage": "scope",
       "timestamp": "2026-06-22T13:48:30Z",
       "type": "stage_agent_started"
+    },
+    {
+      "change_summary": "Intent check: comprehensive trader toolkit expansion initiative",
+      "revision": 1,
+      "timestamp": "2026-06-22T13:50:57Z",
+      "type": "scope_update"
+    },
+    {
+      "stage": "scope",
+      "summary": "Intent check written: identifies this as a multi-feature enhancement initiative requiring prioritization. Asks builder to clarify which features should land in Phase 1 vs future phases, and whether to expand the TUI or create a new UI tier.",
+      "timestamp": "2026-06-22T13:51:01Z",
+      "type": "stage_work_complete",
+      "worktree_head": "d7b8ff8ac8cf29c84f6cd69c059de77963159237",
+      "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "base_branch": "master",
+      "conflict_message": "sync lock timeout: another sync is in progress (waited 10s) at /Users/nickmoore/setups/.defract/.sync.lock",
+      "timestamp": "2026-06-22T13:51:55Z",
+      "type": "worktree_sync_conflict"
+    },
+    {
+      "mode": "approve_initial",
+      "model": "opus",
+      "session_id": "01kvqsm7e91dhxdpkyp218f6k1",
+      "stage": "scope",
+      "timestamp": "2026-06-22T13:51:55Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "note": "Writing full scope (revision 2): Phase 1 entry/exit levels + Phase 2 earnings calendar.",
+      "phase": 0,
+      "stage": "scope",
+      "timestamp": "2026-06-22T13:53:55Z",
+      "type": "work_resumed"
+    },
+    {
+      "change_summary": "Full scope: focused Phase 1 (entry/exit/stop levels + R:R) and Phase 2 (earnings calendar), with the broader AI/heavy-data vision deferred to backlog. Detailed phases, architecture and design stages skipped.",
+      "revision": 2,
+      "timestamp": "2026-06-22T13:54:59Z",
+      "type": "scope_update"
+    },
+    {
+      "rationale": "New user-visible functionality (entry/exit levels + earnings warnings) but tightly contained. Skipping design: all output extends existing TUI detail panel, plain table, and symbol-command patterns with no new presentation surface or visual-design decisions. Skipping architecture: changes are additive within established subsystems (data/analysis/models/ui) reusing existing config-threading, pure-function, and rate-limited-fetch patterns — no new system boundaries. Two phases warrant review (heuristic level placement; an added per-setup API call), so review and release stages are retained.",
+      "stages": [
+        "scope",
+        "implementation",
+        "review",
+        "release"
+      ],
+      "template": "full-feature",
+      "tier": "standard",
+      "timestamp": "2026-06-22T13:55:14Z",
+      "type": "workflow_classified"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Scope the broad 11-feature brief down to a shippable Phase 1 (entry/exit/stop levels + R:R) and Phase 2 (earnings calendar); defer the 9 AI/heavy-data feature areas to the backlog.",
+      "rationale": "The brief is far too large for one task. Entry/exit (the builder's lead ask) and earnings (explicitly requested) build directly on existing data and patterns, deliver immediate trader value, and require no new AI integration or historical-data feeds. Shipping these first validates direction before investing in the heavier subsystems.",
+      "timestamp": "2026-06-22T13:55:17Z",
+      "type": "decision"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Compute entry/stop/target from a configurable percentage-and-gap model (--stop-pct, --reward-mult) instead of ATR-based volatility stops.",
+      "rationale": "The pipeline does not fetch intraday/historical OHLC candles, and Finnhub's free tier restricts candle data. The existing atr() function cannot be fed real inputs without new, rate-limited (and possibly unavailable) calls. A percentage model uses only data already fetched (prev_close, premarket_price), keeps Phase 1 dependency-free and unit-testable, and bounds stop distance sensibly on large gaps. ATR refinement is noted as future work.",
+      "timestamp": "2026-06-22T13:55:20Z",
+      "type": "decision"
+    },
+    {
+      "stage": "scope",
+      "summary": "Full scope pushed as revision 2. Narrowed the 11-feature brief to a shippable two-phase task: Phase 1 adds direction-aware entry/stop/target levels with a risk/reward ratio, computed from existing quote data plus configurable --stop-pct/--reward-mult flags (no new data dependency); Phase 2 adds an earnings-calendar fetch flagging imminent earnings. Both surface across the TUI detail panel, plain table, and symbol command. ATR-based stops deferred (no candle data on free tier). The other 9 brief feature areas (correlations, AI news synthesis, conversational analyst, sentiment, anomaly detection, scenario modeling, charting, backtesting, order flow) are deferred and proposed as backlog items. Workflow: full-feature/standard, stages scope → implementation → review → release (design and architecture skipped — additive changes within existing subsystems and UI patterns). 12 requirements, 9 acceptance criteria, 2 phases.",
+      "timestamp": "2026-06-22T13:55:49Z",
+      "type": "stage_work_complete",
+      "worktree_head": "d7b8ff8ac8cf29c84f6cd69c059de77963159237",
+      "worktree_status_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
+  "needsArchitecture": false,
+  "needsDesign": false,
+  "workflow": {
+    "tier": "standard",
+    "template": "full-feature",
+    "stages": [
+      "scope",
+      "implementation",
+      "review",
+      "release"
+    ],
+    "classifiedBy": "scope-agent",
+    "rationale": "New user-visible functionality (entry/exit levels + earnings warnings) but tightly contained. Skipping design: all output extends existing TUI detail panel, plain table, and symbol-command patterns with no new presentation surface or visual-design decisions. Skipping architecture: changes are additive within established subsystems (data/analysis/models/ui) reusing existing config-threading, pure-function, and rate-limited-fetch patterns — no new system boundaries. Two phases warrant review (heuristic level placement; an added per-setup API call), so review and release stages are retained."
+  },
   "stages": {
-    "architecture": {
-      "status": "not_started"
-    },
-    "design": {
-      "status": "not_started"
-    },
     "scope": {
-      "status": "in_progress",
-      "startedAt": "2026-06-22T13:48:30Z"
-    },
-    "release": {
-      "status": "not_started"
+      "status": "awaiting_approval",
+      "startedAt": "2026-06-22T13:51:55Z"
     },
     "review": {
       "status": "not_started"
     },
+    "architecture": {
+      "status": "skipped"
+    },
     "implementation": {
+      "status": "not_started"
+    },
+    "design": {
+      "status": "skipped"
+    },
+    "release": {
       "status": "not_started"
     }
   },
   "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
   "worktreeBaseBranch": "master",
   "stageModels": {
-    "implementation": "opus",
-    "release": "haiku",
+    "scope_initial": "haiku",
     "review": "sonnet",
     "scope_full": "opus",
-    "scope_initial": "haiku",
+    "release": "haiku",
     "architecture": "opus",
-    "design": "sonnet"
+    "design": "sonnet",
+    "implementation": "opus"
   }
 }
