@@ -14,7 +14,6 @@ defract:
   assignee: holynakamoto
 ---
 
-
 ## Story Brief
 
 Would like to add entry and exit positions, heat maps or matricies showing show sector by sector correlations, ai powere news synthesis.  Earnings and event calendar integration, sentiment and narrative tracking.  Advanced charting with AI overlays. Backtesting historical analogs, order flow and liquidity analisys.  Conversational AI analyst, anomoly detection, scenario modeling.
@@ -151,3 +150,34 @@ Within this task specifically, entry/exit levels use a transparent percentage-an
 ### Dependencies
 
 Phase 2 builds on the model field plumbing established in Phase 1 but is otherwise independent; Phase 1 is fully shippable on its own.
+
+## Implementation Notes
+
+## Phase 1: Actionable entry and exit levels — complete
+
+Every setup now carries a direction-aware trade plan (entry, stop, target, risk/reward), tunable via two new CLI flags, surfaced across all three output surfaces.
+
+### What was built
+
+- **`src/analysis/indicators.rs`** — added the pure `trade_levels(entry, is_long, stop_pct, reward_mult) -> TradeLevels` function. LONG places the stop `stop_pct` below entry and the target `stop_pct * reward_mult` above; SHORT mirrors it. R:R = reward distance / risk distance (equals `reward_mult` by construction). Guards a non-positive entry or stop_pct by returning a neutral plan. The file-level `#![allow(dead_code)]` was replaced with per-function `#[allow(dead_code)]` on the still-unused functions so `trade_levels` is genuinely compiler-verified as used. Five unit tests added: LONG, SHORT, R:R-equals-reward-mult, wider-knobs, and zero-price boundary.
+- **`src/models/setup.rs`** — added the `TradeLevels` struct (entry/stop/target/risk_reward, all `Serialize`/`Deserialize`) and an owned `levels: TradeLevels` field on `Setup`.
+- **`src/models/mod.rs`** — re-export `TradeLevels`.
+- **`src/analysis/screener.rs`** — `ScreenerConfig` gains `stop_pct` (default 5.0) and `reward_mult` (default 2.0); `scan()` computes `levels` per setup from `ticker.premarket_price` and `is_long = ticker.gap_pct() >= 0.0`.
+- **`src/main.rs`** — added `--stop-pct` and `--reward-mult` clap flags threaded into `ScreenerConfig`. `print_table` gains Entry/Stop/Target/R:R columns (SHORT% retained); the `Symbol` subcommand prints Direction, Entry, Stop, Target, Risk/Reward.
+- **`src/ui/dashboard.rs`** — `render_detail` gains a "Trade Plan" line with entry, color-coded stop (red) and target (green), and R:R, fitting within the existing 10-line detail block.
+
+### Deviations from plan
+
+- Decided against a compact TUI table column (the phase listed it as optional) to keep the existing table column constraints untouched; the detail panel carries the full plan.
+- `trade_levels` takes `is_long: bool` rather than the `direction()` `&str` to keep the pure function decoupled from the string format.
+
+### Verification
+
+- `cargo build` clean, no new warnings.
+- `cargo test`: 93 passed (88 baseline + 5 new).
+- `--stop-pct`/`--reward-mult` flags present in `--help`.
+
+### Files changed
+
+`src/analysis/indicators.rs`, `src/models/setup.rs`, `src/models/mod.rs`, `src/analysis/screener.rs`, `src/main.rs`, `src/ui/dashboard.rs`.
+

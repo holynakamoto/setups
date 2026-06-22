@@ -2,10 +2,10 @@
   "id": "task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
   "status": "active",
   "stage": "implementation",
-  "phase": 0,
+  "phase": 1,
   "totalPhases": 2,
   "createdAt": "2026-06-22T13:48:30Z",
-  "updatedAt": "2026-06-22T14:05:57Z",
+  "updatedAt": "2026-06-22T14:10:53Z",
   "events": [
     {
       "models": {
@@ -188,6 +188,151 @@
       "phase": 1,
       "timestamp": "2026-06-22T14:05:57Z",
       "type": "progress_report"
+    },
+    {
+      "description": "Running full check suite",
+      "percentage": 80,
+      "phase": 1,
+      "timestamp": "2026-06-22T14:06:13Z",
+      "type": "progress_report"
+    },
+    {
+      "details": "cargo test: 93 passed (88 baseline + 5 new trade_levels tests covering LONG, SHORT, R:R-equals-reward-mult, wider-knobs, and zero-price boundary). cargo build clean with no new warnings. CLI flags --stop-pct and --reward-mult parse correctly.",
+      "failed": 0,
+      "passed": 93,
+      "phase": 0,
+      "skipped": 0,
+      "timestamp": "2026-06-22T14:06:15Z",
+      "type": "test_results"
+    },
+    {
+      "alternatives_considered": [
+        "Pass direction() &str into the function",
+        "Make levels Option<TradeLevels> on Setup"
+      ],
+      "decision": "Implementation: trade_levels takes an is_long: bool rather than the direction &str, and Setup carries an owned levels: TradeLevels field (not Option).",
+      "phase": 1,
+      "rationale": "An is_long bool keeps the pure function self-contained and trivially unit-testable without coupling to Setup::direction()'s string format; the screener derives is_long from ticker.gap_pct() >= 0.0, matching direction() exactly. Every scanned setup always gets levels, so an owned field is simpler than an Option that would never be None.",
+      "timestamp": "2026-06-22T14:06:22Z",
+      "type": "decision"
+    },
+    {
+      "alternatives_considered": [],
+      "decision": "Implementation: replaced the file-level #![allow(dead_code)] in indicators.rs with per-function #[allow(dead_code)] on the still-unused functions (vwap, relative_volume, gap_pct, atr, ema).",
+      "phase": 1,
+      "rationale": "The phase asked to remove trade_levels from the dead-code allowance now that it is used. A blanket file-level allow would have kept trade_levels suppressed too; per-function allows let the compiler genuinely verify trade_levels is used while keeping the unrelated pure functions warning-free, satisfying the no-new-warnings acceptance criterion.",
+      "timestamp": "2026-06-22T14:06:25Z",
+      "type": "decision"
+    },
+    {
+      "change_summary": "Phase 1 complete: Actionable entry and exit levels",
+      "revision": 1,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T14:06:39Z",
+      "type": "stage_content_updated"
+    },
+    {
+      "artifacts_created": [
+        "src/analysis/indicators.rs",
+        "src/models/setup.rs",
+        "src/models/mod.rs",
+        "src/analysis/screener.rs",
+        "src/main.rs",
+        "src/ui/dashboard.rs"
+      ],
+      "phase": 0,
+      "summary": "Added direction-aware trade levels (entry/stop/target/risk-reward) to every setup. New pure trade_levels() in indicators.rs with 5 unit tests; TradeLevels struct + owned field on Setup; --stop-pct (5.0) and --reward-mult (2.0) flags threaded through ScreenerConfig; levels rendered in the plain table, the Symbol subcommand, and the TUI detail panel. Build clean, 93 tests pass.",
+      "timestamp": "2026-06-22T14:06:44Z",
+      "type": "phase_completed"
+    },
+    {
+      "description": "Phase 1 implementation complete — awaiting approval",
+      "percentage": 100,
+      "phase": 1,
+      "timestamp": "2026-06-22T14:06:48Z",
+      "type": "progress_report"
+    },
+    {
+      "items": [
+        {
+          "description": "Run `cargo run -- --plain` and confirm each setup row shows `ENTRY`, `STOP`, `TARGET`, and `R:R` values alongside the existing columns."
+        },
+        {
+          "description": "On a gap-up (LONG) row, verify `STOP` is below `ENTRY` and `TARGET` is above it; on a gap-down (SHORT) row, verify `STOP` is above `ENTRY` and `TARGET` is below it."
+        },
+        {
+          "description": "Run `cargo run -- --stop-pct 10 --reward-mult 3` and compare the same symbol against the defaults — stops should be visibly wider and targets proportionally further, with `R:R` reading `3.00`."
+        },
+        {
+          "description": "Run `cargo run -- symbol NVDA` and confirm the output prints `Direction`, `Entry`, `Stop`, `Target`, and `Risk/Reward` lines."
+        },
+        {
+          "description": "Launch the TUI with `cargo run`, select a setup, and confirm the detail panel shows a `Trade Plan` line with entry, a red `Stop`, a green `Target`, and `R:R`."
+        },
+        {
+          "description": "Confirm `cargo test` reports 93 passing and `cargo build` finishes with no warnings."
+        }
+      ],
+      "phase": 0,
+      "phase_title": "Actionable entry and exit levels",
+      "timestamp": "2026-06-22T14:06:53Z",
+      "type": "manual_tests"
+    },
+    {
+      "agent_phase": 1,
+      "phase_title": "Actionable entry and exit levels",
+      "server_phase": 0,
+      "timestamp": "2026-06-22T14:06:58Z",
+      "type": "phase_drift_detected"
+    },
+    {
+      "phase": 0,
+      "phase_title": "Actionable entry and exit levels",
+      "timestamp": "2026-06-22T14:06:58Z",
+      "type": "phase_awaiting_approval",
+      "worktree_head": "c9cdb900c225148500b18a65f09abdd9a15d41f6",
+      "worktree_status_digest": "5e8a6e7cb2a9cc08771f85b12d35854b2a72ed9fa31a8996bdd456708cca4072"
+    },
+    {
+      "approved_by": "user",
+      "phase": 0,
+      "phase_title": "Actionable entry and exit levels",
+      "timestamp": "2026-06-22T14:09:37Z",
+      "type": "phase_approved"
+    },
+    {
+      "checked_indices": [],
+      "phase": 0,
+      "timestamp": "2026-06-22T14:09:37Z",
+      "type": "manual_tests_checks_persisted"
+    },
+    {
+      "base_branch": "master",
+      "merged_commits": 1,
+      "timestamp": "2026-06-22T14:09:37Z",
+      "type": "worktree_synced"
+    },
+    {
+      "mode": "continue",
+      "model": "opus",
+      "session_id": "01kvqtmn7p6aep9dvc6rw9nesq",
+      "stage": "implementation",
+      "timestamp": "2026-06-22T14:09:38Z",
+      "type": "stage_agent_started"
+    },
+    {
+      "note": "Implementing Phase 2: earnings calendar fetch and imminent-earnings warnings",
+      "phase": 1,
+      "stage": "implementation",
+      "timestamp": "2026-06-22T14:10:50Z",
+      "type": "work_resumed"
+    },
+    {
+      "description": "Starting phase 2: Earnings awareness",
+      "percentage": 0,
+      "phase": 2,
+      "timestamp": "2026-06-22T14:10:53Z",
+      "type": "progress_report"
     }
   ],
   "needsArchitecture": false,
@@ -207,24 +352,27 @@
   "stageApprovals": {
     "scope": "2026-06-22T14:01:01Z"
   },
+  "stageContent": {
+    "implementation": "## Phase 1: Actionable entry and exit levels — complete\n\nEvery setup now carries a direction-aware trade plan (entry, stop, target, risk/reward), tunable via two new CLI flags, surfaced across all three output surfaces.\n\n### What was built\n\n- **`src/analysis/indicators.rs`** — added the pure `trade_levels(entry, is_long, stop_pct, reward_mult) -> TradeLevels` function. LONG places the stop `stop_pct` below entry and the target `stop_pct * reward_mult` above; SHORT mirrors it. R:R = reward distance / risk distance (equals `reward_mult` by construction). Guards a non-positive entry or stop_pct by returning a neutral plan. The file-level `#![allow(dead_code)]` was replaced with per-function `#[allow(dead_code)]` on the still-unused functions so `trade_levels` is genuinely compiler-verified as used. Five unit tests added: LONG, SHORT, R:R-equals-reward-mult, wider-knobs, and zero-price boundary.\n- **`src/models/setup.rs`** — added the `TradeLevels` struct (entry/stop/target/risk_reward, all `Serialize`/`Deserialize`) and an owned `levels: TradeLevels` field on `Setup`.\n- **`src/models/mod.rs`** — re-export `TradeLevels`.\n- **`src/analysis/screener.rs`** — `ScreenerConfig` gains `stop_pct` (default 5.0) and `reward_mult` (default 2.0); `scan()` computes `levels` per setup from `ticker.premarket_price` and `is_long = ticker.gap_pct() >= 0.0`.\n- **`src/main.rs`** — added `--stop-pct` and `--reward-mult` clap flags threaded into `ScreenerConfig`. `print_table` gains Entry/Stop/Target/R:R columns (SHORT% retained); the `Symbol` subcommand prints Direction, Entry, Stop, Target, Risk/Reward.\n- **`src/ui/dashboard.rs`** — `render_detail` gains a \"Trade Plan\" line with entry, color-coded stop (red) and target (green), and R:R, fitting within the existing 10-line detail block.\n\n### Deviations from plan\n\n- Decided against a compact TUI table column (the phase listed it as optional) to keep the existing table column constraints untouched; the detail panel carries the full plan.\n- `trade_levels` takes `is_long: bool` rather than the `direction()` `&str` to keep the pure function decoupled from the string format.\n\n### Verification\n\n- `cargo build` clean, no new warnings.\n- `cargo test`: 93 passed (88 baseline + 5 new).\n- `--stop-pct`/`--reward-mult` flags present in `--help`.\n\n### Files changed\n\n`src/analysis/indicators.rs`, `src/models/setup.rs`, `src/models/mod.rs`, `src/analysis/screener.rs`, `src/main.rs`, `src/ui/dashboard.rs`.\n"
+  },
   "stages": {
-    "scope": {
-      "status": "approved",
-      "approvedAt": "2026-06-22T14:01:01Z",
-      "startedAt": "2026-06-22T13:51:55Z"
+    "release": {
+      "status": "not_started"
     },
     "review": {
       "status": "not_started"
     },
+    "implementation": {
+      "status": "in_progress",
+      "startedAt": "2026-06-22T14:09:38Z"
+    },
     "architecture": {
       "status": "skipped"
     },
-    "implementation": {
-      "status": "in_progress",
-      "startedAt": "2026-06-22T14:02:34Z"
-    },
-    "release": {
-      "status": "not_started"
+    "scope": {
+      "status": "approved",
+      "approvedAt": "2026-06-22T14:01:01Z",
+      "startedAt": "2026-06-22T13:51:55Z"
     },
     "design": {
       "status": "skipped"
@@ -232,14 +380,14 @@
   },
   "worktreePath": "/Users/nickmoore/setups/.defract-worktrees/task-would-like-to-add-entry-and-exit-01kvqsdz9c20",
   "worktreeBaseBranch": "master",
-  "worktreeLastSyncedAt": "2026-06-22T14:02:34Z",
+  "worktreeLastSyncedAt": "2026-06-22T14:09:37Z",
   "stageModels": {
     "design": "sonnet",
-    "scope_full": "opus",
+    "architecture": "opus",
     "scope_initial": "haiku",
     "release": "haiku",
     "implementation": "opus",
-    "architecture": "opus",
+    "scope_full": "opus",
     "review": "sonnet"
   }
 }
