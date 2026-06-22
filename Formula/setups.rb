@@ -7,12 +7,12 @@ class Setups < Formula
   on_macos do
     on_arm do
       url "https://github.com/holynakamoto/setups/releases/download/v#{version}/setups-aarch64-apple-darwin.tar.gz"
-      sha256 "PLACEHOLDER_SHA256_AARCH64"
+      sha256 "4434a41350ca4700a9c9991d87ad6d708456bf1ed2d8c5bed0ca8adcc8636fad"
     end
 
     on_intel do
       url "https://github.com/holynakamoto/setups/releases/download/v#{version}/setups-x86_64-apple-darwin.tar.gz"
-      sha256 "PLACEHOLDER_SHA256_X86_64"
+      sha256 "2ee81ce58b2fe9146c985cb3d6ac7521910d9cef47dea1981be2994e97b965db"
     end
   end
 
